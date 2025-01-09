@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "typy"
+version = "0.1.0"
+description = ""
+authors = ["Manuel Goulão <msilvagoulao@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+typst = "^0.12.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
