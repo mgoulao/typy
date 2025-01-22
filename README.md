@@ -2,7 +2,8 @@
 
 typy is a Python library to generate reports, presentations, and other documents (for now, only PDFs) using Typst. The library offers an easy-to-use API to create documents from predefined templates, templates that you can create, or from scratch.
 
-Warning: This library is still very experimental.
+> [!WARNING]
+> This library is still very experimental and for now my main goal is to test the idea as a whole.
 
 typy is composed of two main components:
 * the Python library, which is the interface to create documents
