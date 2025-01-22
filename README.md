@@ -102,7 +102,10 @@ Templates in Typst must:
 
 ### Python
 
-To declare a template in Python, you must create a class that inherits from the `Template`
+To declare a template in Python, you must:
+1. Create a class that inherits from the `Template`
+2. Define the default fields of the template (i.e. `__template_name__` and `__template_path__`)
+3. Define the data model of the template by adding fields to the class
 
 ```python
 from typy.templates import Template
