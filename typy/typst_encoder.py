@@ -1,3 +1,4 @@
+import dataclasses
 from datetime import datetime
 from pathlib import Path
 from typy.encodable import Encodable
@@ -25,6 +26,8 @@ class TypstEncoder:
             return Datetime(data).encode()
         elif data is None:
             return "null"
+        elif dataclasses.is_dataclass(data):
+            return cls.encode(data.__dict__)
         elif isinstance(data, Encodable):
             return data.encode()
         else:

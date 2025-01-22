@@ -21,20 +21,26 @@ pip install git+https://github.com/mgoulao/typy.git
 The following code snippet shows how to create a simple PDF document using typy:
 
 ```python
-from typy import DocumentBuilder
+from pathlib import Path
+
+import pandas as pd
+
+from typy.builder import (
+    DocumentBuilder,
+)
+from typy.content import Content
+from typy.functions import Block, Figure, Image, Table
+from typy.markup import Text
+from typy.templates import BasicTemplate
 
 builder = DocumentBuilder()
-
 # Files must be explicitly added to the document builder
-img_path = builder.add_file(Path("example.png"))
+img_path = builder.add_file(Path(__file__).parent / "example.png")
 
-table_df = pd.DataFrame({
-    'A': [1, 2, 3],
-    'B': [4, 5, 6]
-})
+table_df = pd.DataFrame({"A": [1, 2, 3], "B": [4, 5, 6]})
 
 # Build like you would using Typst
-content = Block(
+body = Block(
     Content(
         [
             Text("This is a text"),
@@ -44,24 +50,22 @@ content = Block(
     )
 )
 
-# Build the document from a template
-builder.from_template(
-    "template1",
-    data={
-        "title": "Hello, World!",
-        "date": "12/12/2023",
-        "author": "John Doe",
-        "content1": content
-    }
+template = BasicTemplate(
+    title="Basic Template",
+    date="2023-01-01",
+    author="John Doe",
+    body=body,
 )
 
-builder.save_pdf("output.pdf")
+builder.add_template(template).save_pdf("basic.pdf")
 ```
 
 
 ## Templates
 
-Templates must:
+### Typst
+
+Templates in Typst must:
 * import the `typy` Typst library which exposes the `init_typy` function, which initializes the data for the placeholder functions
 * import the `typy_data.typ` file, which will be created by the Python library during build time and which will contain the data to be used in the template
 * initialize typy using the `init_typy` function
@@ -96,6 +100,24 @@ Templates must:
 / *Term*: Definition
 ```
 
+### Python
+
+To declare a template in Python, you must create a class that inherits from the `Template`
+
+```python
+from typy.templates import Template
+
+
+@dataclass
+class CustomTemplate(Template):
+    title: str
+    body: Content
+
+    __template_name__ = "custom"
+    __template_path__ = Path(__file__).parent / "custom.typ"
+```
+
+
 ## Typst encoding
 
-The current code to encode the data into Typst markup is still very basic and only supports a few types, functions, and markup elements.
+The current code to encode the data into Typst markup is still very basic and only supports a few types, functions, and markup elements. **Most importantly, it is very buggy.**

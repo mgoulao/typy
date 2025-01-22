@@ -4,6 +4,7 @@ from typy.builder import DocumentBuilder
 from typy.markup import Heading
 from typy.content import Content
 from typy.functions import Lorem
+from typy.templates import PresentationTemplate
 
 builder = DocumentBuilder()
 
@@ -27,17 +28,15 @@ section2 = Content(
     ]
 )
 
-data = {
-    "title": "Typy Presentation",
-    "subtitle": "Easy slides in Typst",
-    "date": datetime(2023, 1, 1).strftime("%Y-%m-%d"),
-    "authors": ["John Doe"],
-    "toc": True,
-    "section1": section1,
-    "section2": section2,
-}
+template = PresentationTemplate(
+    title="Typy Presentation",
+    subtitle="Easy slides in Typst",
+    date=datetime(2023, 1, 1).strftime("%Y-%m-%d"),
+    authors=["John Doe"],
+    toc=True,
+    section1=section1,
+    section2=section2,
+)
 
-builder.from_template(
-    "presentation",
-    data=data,
-).save_pdf("presentation.pdf")
+
+builder.add_template(template).save_pdf("presentation.pdf")
