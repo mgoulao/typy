@@ -61,6 +61,10 @@ template = BasicTemplate(
 builder.add_template(template).save_pdf("basic.pdf")
 ```
 
+### Result
+
+![Basic PDF](./example.png)
+
 
 ## Templates
 
