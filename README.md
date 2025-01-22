@@ -14,7 +14,7 @@ typy is composed of two main components:
 To install typy, you can use pip:
 
 ```bash
-pip install git+https://github.com/mgoulao/typy.git
+pip install git+https://github.com/mgoulao/typy
 ```
 
 ## Basic usage
