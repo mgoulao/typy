@@ -45,6 +45,8 @@ class TypstEncoder:
 
     @classmethod
     def encode_string(cls, data):
+        # Escape double quotes with backslash
+        data = data.replace('"', r'\"')
         return f'"{data}"'
 
     @classmethod

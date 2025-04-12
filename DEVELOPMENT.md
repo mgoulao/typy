@@ -1,0 +1,5 @@
+## Test
+
+```
+poetry run pytest
+```
