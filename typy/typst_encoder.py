@@ -41,7 +41,7 @@ class TypstEncoder:
     @classmethod
     def encode_list(cls, data):
         items = [cls.encode(item) for item in data]
-        return f"({', '.join(items)})"
+        return f"({', '.join(items)},)"
 
     @classmethod
     def encode_string(cls, data):
