@@ -1,3 +1,4 @@
+import importlib
 import shutil
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -5,7 +6,7 @@ from typing import Type
 
 import typst
 
-from typy.templates import Template, Template
+from typy.templates import Template
 from typy.typst_encoder import TypstEncoder
 
 
@@ -15,10 +16,9 @@ class DocumentBuilder:
         self.template: Template = None
 
     def add_template(self, template: Template):
-        typy_module = Path(__file__).parent.parent / "lib" / "typy.typ"
-
-        shutil.copy(template.__template_path__, Path(self.tmp_dir.name) / "main.typ")
-        shutil.copy(typy_module, Path(self.tmp_dir.name) / "typy.typ")
+        with importlib.resources.path("lib", "typy.typ") as typy_module_path:
+            shutil.copy(template.__template_path__, Path(self.tmp_dir.name) / "main.typ")
+            shutil.copy(typy_module_path, Path(self.tmp_dir.name) / "typy.typ")
 
         data_str = f"#let typy_data = {TypstEncoder.encode(template.get_data())}\n"
 
