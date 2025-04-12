@@ -4,10 +4,7 @@ version = "0.1.1"
 description = ""
 authors = ["Manuel Goulão <msilvagoulao@gmail.com>"]
 readme = "README.md"
-packages = [
-    {include = "typy"},
-    {include = "lib"},
-]
+packages = [{include = "typy"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
