@@ -17,7 +17,14 @@ class DocumentBuilder:
     def add_template(self, template: Template):
         typy_module = Path(__file__).parent / "static" / "typy.typ"
 
-        shutil.copy(template.__template_path__, Path(self.tmp_dir.name) / "main.typ")
+        if not template.__template_path__.exists():
+            raise FileNotFoundError(
+                f"Template file not found: {template.__template_path__}"
+            )
+        elif template.__template_path__.is_dir():
+            shutil.copy(template.__template_path__, Path(self.tmp_dir.name))
+        else:
+            shutil.copy(template.__template_path__, Path(self.tmp_dir.name) / "main.typ")
         shutil.copy(typy_module, Path(self.tmp_dir.name) / "typy.typ")
 
         data_str = f"#let typy_data = {TypstEncoder.encode(template.get_data())}\n"

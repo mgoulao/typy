@@ -1,20 +1,24 @@
-from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
+
+from pydantic import BaseModel, ConfigDict
 
 from typy.content import Content
 
 
-@dataclass
-class Template:
-    __template_name__: str = field(init=False, repr=False)
-    __template_path__: Path = field(init=False, repr=False)
+class Template(BaseModel):
+    __template_name__: str
+    __template_path__: Path
 
-    def get_data(self):
-        return {k: v for k, v in self.__dict__.items()}
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    def get_data(self) -> dict:
+        return self.model_dump()
 
 
+# =================
 # Letter template
-@dataclass
+# =================
 class LetterTemplate(Template):
     sender_name: str
     sender_street: str
@@ -38,24 +42,24 @@ class LetterTemplate(Template):
     __template_path__ = Path(__file__).parent.parent / "templates" / "letter.typ"
 
 
+# =================
 # Invoice template
-@dataclass
-class InvoiceItem:
+# =================
+class InvoiceItem(BaseModel):
     description: str
     price: float
 
 
-@dataclass
 class InvoiceTemplate(Template):
     invoice_nr: str
-    invoice_date: str
+    invoice_date: datetime
     items: list[InvoiceItem]
     author_name: str
     author_street: str
     author_zip: str
     author_city: str
     author_tax_nr: str
-    author_signature: Content
+    author_signature: Path
     recipient_name: str
     recipient_street: str
     recipient_zip: str
@@ -71,7 +75,9 @@ class InvoiceTemplate(Template):
     __template_path__ = Path(__file__).parent.parent / "templates" / "invoice.typ"
 
 
-@dataclass
+# =================
+# Presentation template
+# =================
 class PresentationTemplate(Template):
     title: str
     subtitle: str
@@ -84,7 +90,10 @@ class PresentationTemplate(Template):
     __template_name__ = "presentation"
     __template_path__ = Path(__file__).parent.parent / "templates" / "presentation.typ"
 
-@dataclass
+
+# =================
+# Basic template
+# =================
 class BasicTemplate(Template):
     title: str
     date: str

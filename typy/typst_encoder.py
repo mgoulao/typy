@@ -1,6 +1,9 @@
 import dataclasses
 from datetime import datetime
 from pathlib import Path
+from typing import Dict, List
+
+from pydantic import BaseModel
 from typy.encodable import Encodable
 
 
@@ -24,6 +27,8 @@ class TypstEncoder:
         elif isinstance(data, datetime):
             from typy.functions import Datetime
             return Datetime(data).encode()
+        elif isinstance(data, BaseModel):
+            return cls.encode_pydantic_model(data)
         elif data is None:
             return "null"
         elif dataclasses.is_dataclass(data):
@@ -34,29 +39,33 @@ class TypstEncoder:
             raise TypeError(f"Unsupported data type: {type(data)}")
 
     @classmethod
-    def encode_dict(cls, data):
+    def encode_dict(cls, data: Dict) -> str:
         items = [f"{k}: {cls.encode(v)}" for k, v in data.items()]
         return f"({', '.join(items)})"
 
     @classmethod
-    def encode_list(cls, data):
+    def encode_list(cls, data: List) -> str:
         items = [cls.encode(item) for item in data]
         return f"({', '.join(items)},)"
 
     @classmethod
-    def encode_string(cls, data):
+    def encode_string(cls, data: str) -> str:
         # Escape double quotes with backslash
         data = data.replace('"', r'\"')
         return f'"{data}"'
 
     @classmethod
-    def encode_int(cls, data):
+    def encode_int(cls, data: int) -> str:
         return str(data)
 
     @classmethod
-    def encode_float(cls, data):
+    def encode_float(cls, data: float) -> str:
         return str(data)
 
     @classmethod
-    def encode_path(cls, data):
+    def encode_path(cls, data: Path) -> str:
         return f'"{str(data)}"'
+
+    @classmethod
+    def encode_pydantic_model(cls, data: BaseModel) -> str:
+        return cls.encode(data.model_dump())
