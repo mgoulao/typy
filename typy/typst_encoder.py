@@ -46,6 +46,8 @@ class TypstEncoder:
     @classmethod
     def encode_list(cls, data: List) -> str:
         items = [cls.encode(item) for item in data]
+        if not items:
+            return "()"
         return f"({', '.join(items)},)"
 
     @classmethod

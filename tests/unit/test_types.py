@@ -1,26 +1,28 @@
 from typy.typst_encoder import TypstEncoder
+import pytest
 
 
-def test_list():
-    list = ["test", "test2"]
-    assert TypstEncoder.encode(list) == '("test", "test2",)'
+@pytest.mark.parametrize(
+    "input_list, expected_output",
+    [
+        (["test", "test2"], '("test", "test2",)'),
+        ([1], "(1,)"),
+        ([], "()"),
+    ],
+)
+def test_list(input_list, expected_output):
+    assert TypstEncoder.encode(input_list) == expected_output
 
-    list2 = [1]
-    assert TypstEncoder.encode(list2) == "(1,)"
 
-
-def test_str():
-    str = "test"
-    assert TypstEncoder.encode(str) == "test"
-
-    str2 = "test test"
-    assert TypstEncoder.encode(str2) == "test test"
-
-    str3 = "test test test"
-    assert TypstEncoder.encode(str3) == "test test test"
-
-    str4 = "test\ntest"
-    assert TypstEncoder.encode(str4) == "test\ntest"
-
-    str5 = 'test "test"'
-    assert TypstEncoder.encode(str5) == 'test "test"'
+@pytest.mark.parametrize(
+    "input_str, expected_output",
+    [
+        ("test", '"test"'),
+        ("test test", '"test test"'),
+        ("test test test", '"test test test"'),
+        ("test\ntest", '"test\ntest"'),
+        ('test "test"', '"test \\"test\\""'),
+    ],
+)
+def test_str(input_str, expected_output):
+    assert TypstEncoder.encode(input_str) == expected_output
