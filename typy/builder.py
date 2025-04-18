@@ -22,7 +22,7 @@ class DocumentBuilder:
                 f"Template file not found: {template.__template_path__}"
             )
         elif template.__template_path__.is_dir():
-            shutil.copy(template.__template_path__, Path(self.tmp_dir.name))
+            shutil.copytree(template.__template_path__, Path(self.tmp_dir.name), dirs_exist_ok=True)
         else:
             shutil.copy(template.__template_path__, Path(self.tmp_dir.name) / "main.typ")
         shutil.copy(typy_module, Path(self.tmp_dir.name) / "typy.typ")
