@@ -1,7 +1,9 @@
+from io import BytesIO
 import shutil
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Type
+import traceback
 
 import typst
 
@@ -22,9 +24,13 @@ class DocumentBuilder:
                 f"Template file not found: {template.__template_path__}"
             )
         elif template.__template_path__.is_dir():
-            shutil.copytree(template.__template_path__, Path(self.tmp_dir.name), dirs_exist_ok=True)
+            shutil.copytree(
+                template.__template_path__, Path(self.tmp_dir.name), dirs_exist_ok=True
+            )  #
         else:
-            shutil.copy(template.__template_path__, Path(self.tmp_dir.name) / "main.typ")
+            shutil.copy(
+                template.__template_path__, Path(self.tmp_dir.name) / "main.typ"
+            )
         shutil.copy(typy_module, Path(self.tmp_dir.name) / "typy.typ")
 
         data_str = f"#let typy_data = {TypstEncoder.encode(template.get_data())}\n"
@@ -54,23 +60,37 @@ class DocumentBuilder:
             Path(self.tmp_dir.name)
         )
 
-    def compile(self, typ_file: Path):
+    def compile(self, typ_file: Path, output: Path):
         try:
             typst.compile(
                 typ_file,
-                output=Path(self.tmp_dir.name) / "output.pdf",
+                output=output,
             )
         except Exception as e:
             print("Error while compiling the document:")
-            with open(typ_file, "r", encoding="utf-8") as f:
-                print(f.read())
+            traceback.print_exc()
+            if typ_file.exists():
+                print(f"Typst file content ({typ_file}):")
             raise e
 
         return self
 
     def save_pdf(self, filepath: Path):
-        self.compile(Path(self.tmp_dir.name) / "main.typ")
-        shutil.copy(Path(self.tmp_dir.name) / "output.pdf", filepath)
+        output = Path(self.tmp_dir.name) / "output.pdf"
+        self.compile(Path(self.tmp_dir.name) / "main.typ", output)
+        shutil.copy(output, filepath)
+
+    def to_buffer(self) -> BytesIO:
+        # Compile to a temporary file first since typst.compile doesn't support BytesIO output
+        output = Path(self.tmp_dir.name) / "output.pdf"
+        self.compile(Path(self.tmp_dir.name) / "main.typ", output)
+
+        # Read the compiled PDF into a BytesIO buffer
+        buffer = BytesIO()
+        with open(output, "rb") as f:
+            buffer.write(f.read())
+        buffer.seek(0)
+        return buffer
 
     def save_source(self, dirpath: Path):
         shutil.copy(Path(self.tmp_dir.name), dirpath)
