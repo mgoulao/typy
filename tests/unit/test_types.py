@@ -1,7 +1,11 @@
+import dataclasses
 from datetime import date, datetime
+from pathlib import Path
 
 import pytest
+from pydantic import BaseModel
 
+from typy.encodable import Encodable
 from typy.typst_encoder import TypstEncoder
 
 
@@ -173,3 +177,160 @@ def test_dataframe_mixed_dtypes():
     assert "table(" in result
     assert "[*val*]" in result
     assert "[*flag*]" in result
+
+
+# ---- Path ----
+
+
+@pytest.mark.parametrize(
+    "input_path, expected_output",
+    [
+        (Path("/some/path/to/file.txt"), '"/some/path/to/file.txt"'),
+        (Path("relative/path.pdf"), '"relative/path.pdf"'),
+        (Path("."), '"."'),
+    ],
+)
+def test_path(input_path, expected_output):
+    assert TypstEncoder.encode(input_path) == expected_output
+
+
+# ---- Pydantic BaseModel ----
+
+
+def test_pydantic_base_model():
+    class PersonModel(BaseModel):
+        name: str
+        age: int
+
+    model = PersonModel(name="Alice", age=30)
+    assert TypstEncoder.encode(model) == '(name: "Alice", age: 30)'
+
+
+def test_pydantic_base_model_nested():
+    class AddressModel(BaseModel):
+        city: str
+        zip_code: str
+
+    class PersonModel(BaseModel):
+        name: str
+        address: AddressModel
+
+    model = PersonModel(name="Bob", address=AddressModel(city="Berlin", zip_code="10115"))
+    result = TypstEncoder.encode(model)
+    assert '"Bob"' in result
+    assert '"Berlin"' in result
+    assert '"10115"' in result
+
+
+# ---- Encodable ----
+
+
+def test_encodable_custom_class():
+    class MyEncodable(Encodable):
+        def encode(self):
+            return '"custom_value"'
+
+    obj = MyEncodable()
+    assert TypstEncoder.encode(obj) == '"custom_value"'
+
+
+def test_encodable_returning_dict_syntax():
+    class PointEncodable(Encodable):
+        def __init__(self, x, y):
+            self.x = x
+            self.y = y
+
+        def encode(self):
+            return f"(x: {self.x}, y: {self.y})"
+
+    obj = PointEncodable(3, 4)
+    assert TypstEncoder.encode(obj) == "(x: 3, y: 4)"
+
+
+# ---- Dataclass ----
+
+
+def test_dataclass_simple():
+    @dataclasses.dataclass
+    class Point:
+        x: int
+        y: int
+
+    assert TypstEncoder.encode(Point(1, 2)) == "(x: 1, y: 2)"
+
+
+def test_dataclass_with_string_fields():
+    @dataclasses.dataclass
+    class Person:
+        name: str
+        role: str
+
+    assert TypstEncoder.encode(Person("Alice", "admin")) == '(name: "Alice", role: "admin")'
+
+
+def test_dataclass_nested():
+    @dataclasses.dataclass
+    class Inner:
+        value: int
+
+    @dataclasses.dataclass
+    class Outer:
+        inner: Inner
+        label: str
+
+    result = TypstEncoder.encode(Outer(inner=Inner(42), label="test"))
+    assert "(value: 42)" in result
+    assert '"test"' in result
+
+
+# ---- Edge case strings ----
+
+
+@pytest.mark.parametrize(
+    "input_str, expected_output",
+    [
+        ("Hello # world", '"Hello # world"'),
+        ("Price: $100", '"Price: $100"'),
+        ("// this is a comment", '"// this is a comment"'),
+        ("Code: #let x = 1", '"Code: #let x = 1"'),
+        ("Formula: $x^2$", '"Formula: $x^2$"'),
+        ("Hello 🌍", '"Hello 🌍"'),
+        ("emoji: 😀🎉🚀", '"emoji: 😀🎉🚀"'),
+        ("A" * 1000, '"' + "A" * 1000 + '"'),
+    ],
+)
+def test_str_edge_cases(input_str, expected_output):
+    assert TypstEncoder.encode(input_str) == expected_output
+
+
+# ---- DataFrame edge cases ----
+
+
+def test_dataframe_single_row():
+    pd = pytest.importorskip("pandas")
+    df = pd.DataFrame({"Name": ["Alice"], "Age": [30]})
+    result = TypstEncoder.encode(df)
+    assert "table(" in result
+    assert "[*Name*]" in result
+    assert "[*Age*]" in result
+    assert "[Alice]" in result
+    assert "[30]" in result
+
+
+def test_dataframe_nan_handling():
+    pd = pytest.importorskip("pandas")
+    df = pd.DataFrame({"a": [1.0, float("nan"), 3.0], "b": ["x", None, "z"]})
+    result = TypstEncoder.encode(df)
+    assert "table(" in result
+    assert "[*a*]" in result
+    assert "[*b*]" in result
+
+
+def test_dataframe_multi_index():
+    pd = pytest.importorskip("pandas")
+    index = pd.MultiIndex.from_tuples([(1, "a"), (1, "b"), (2, "a"), (2, "b")])
+    df = pd.DataFrame({"val": [10, 20, 30, 40]}, index=index)
+    result = TypstEncoder.encode(df)
+    assert "table(" in result
+    assert "[*val*]" in result
+    assert "[10]" in result
