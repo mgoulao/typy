@@ -35,6 +35,13 @@ class Content(Encodable):
                 return cls(Markdown(v))
             if isinstance(v, cls):
                 return v
-            return cls(v)
+            from typy.encodable import Encodable
+
+            if isinstance(v, (Encodable, list)):
+                return cls(v)
+            raise ValueError(
+                f"Cannot coerce type '{type(v).__name__}' to Content. "
+                "Expected a str, Content, Encodable, or list."
+            )
 
         return core_schema.no_info_plain_validator_function(validate)

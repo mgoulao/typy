@@ -176,9 +176,9 @@ from typy.templates import BasicTemplate
 
 # Passing a raw string — auto-converted to Markdown
 template = BasicTemplate(
-    title="Report",          # str field: stays a plain string, NOT converted
-    date="2024-01-01",       # str field: stays a plain string, NOT converted
-    author="Jane Doe",       # str field: stays a plain string, NOT converted
+    title="Report",       # str field: stays a plain string, NOT converted
+    date="2024-01-01",
+    author="Jane Doe",
     body="## Summary\n\nThis text is **automatically** rendered as markdown.",
     # ^^^ Content field: raw string is wrapped in Markdown(...)
 )
