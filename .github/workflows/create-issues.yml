@@ -1,7 +1,9 @@
 name: Create project issues
 
 on:
-  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/create-issues.yml'
 
 permissions:
   issues: write
