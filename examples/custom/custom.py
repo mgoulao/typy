@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from pathlib import Path
 
 from typy.builder import (
@@ -13,7 +12,6 @@ from typy.markup import (
 from typy.templates import Template
 
 
-@dataclass
 class CustomTemplate(Template):
     title: str
     body: Content
