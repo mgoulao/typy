@@ -19,13 +19,13 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Set up Poetry
-        uses: abatilo/actions-poetry@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@cec208311dfd045dd5311c1add060b2062131d57 # v8.0.0
         with:
-          poetry-version: "1.8.5"
+          enable-cache: true
 
       - name: Install dependencies
-        run: poetry install --with dev,tests
+        run: uv sync --frozen --all-groups
 
       - name: Run pre-commit
-        run: poetry run pre-commit run --all-files --show-diff-on-failure
+        run: uv run --frozen --group dev pre-commit run --all-files --show-diff-on-failure

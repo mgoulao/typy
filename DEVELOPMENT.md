@@ -1,11 +1,11 @@
 ## Test
 
 ```
-poetry run pytest
+uv run --frozen --group tests pytest
 ```
 
 ## Lint and format
 
 ```
-poetry run pre-commit run --all-files
+uv run --frozen --group dev pre-commit run --all-files
 ```
