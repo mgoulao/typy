@@ -36,7 +36,11 @@ class TypstEncoder:
         elif isinstance(data, Encodable):
             return data.encode()
         else:
-            raise TypeError(f"Unsupported data type: {type(data)}")
+            raise TypeError(
+                f"Cannot encode type '{type(data).__name__}' to Typst. "
+                f"Supported types: str, int, float, bool, list, tuple, dict, Path, "
+                f"datetime, None, dataclass, BaseModel, Encodable"
+            )
 
     @classmethod
     def encode_dict(cls, data: Dict) -> str:

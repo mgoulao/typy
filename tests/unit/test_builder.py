@@ -6,6 +6,7 @@ import tempfile
 from typy.builder import DocumentBuilder
 from typy.templates import BasicTemplate
 from typy.content import Content
+from typy.typst_encoder import TypstEncoder
 
 
 @pytest.fixture
@@ -180,3 +181,116 @@ def test_to_buffer_without_template():
     # The main.typ file won't exist in the temp directory
     with pytest.raises((FileNotFoundError, Exception)):
         builder.to_buffer()
+
+
+# ---- Verbose mode tests ----
+
+def test_verbose_mode_prints_data_source_on_add_template(basic_template, capsys):
+    """Test that verbose mode prints the generated Typst data source on add_template."""
+    builder = DocumentBuilder(verbose=True)
+    builder.add_template(basic_template)
+    captured = capsys.readouterr()
+    assert "[typy]" in captured.out
+    assert "typy_data" in captured.out
+
+
+def test_verbose_mode_prints_data_source_on_add_data(tmp_path, capsys):
+    """Test that verbose mode prints the generated Typst data source on add_data."""
+    builder = DocumentBuilder(verbose=True)
+    builder.add_data({"name": "Alice", "age": 30})
+    captured = capsys.readouterr()
+    assert "[typy]" in captured.out
+    assert "typy_data" in captured.out
+
+
+def test_non_verbose_mode_does_not_print(basic_template, capsys):
+    """Test that non-verbose mode does not print any output."""
+    builder = DocumentBuilder(verbose=False)
+    builder.add_template(basic_template)
+    captured = capsys.readouterr()
+    assert captured.out == ""
+
+
+# ---- Compilation error context tests ----
+
+def test_compilation_error_wrapped_with_message(tmp_path):
+    """Test that compilation errors are wrapped with 'Typst compilation failed' prefix."""
+    builder = DocumentBuilder()
+    # Write an invalid Typst file to trigger a compilation error
+    broken_typ = tmp_path / "broken.typ"
+    broken_typ.write_text("#let x = (", encoding="utf-8")
+    output = tmp_path / "out.pdf"
+    with pytest.raises(Exception, match="Typst compilation failed"):
+        builder.compile(broken_typ, output)
+
+
+def test_compilation_error_includes_source_context(tmp_path):
+    """Test that compilation errors include source context when typy_data.typ exists."""
+    builder = DocumentBuilder()
+    # Populate the builder's temp dir with a typy_data.typ to trigger context extraction
+    typy_data = Path(builder.tmp_dir.name) / "typy_data.typ"
+    typy_data.write_text("#let typy_data = (invalid syntax here\n", encoding="utf-8")
+
+    broken_typ = tmp_path / "broken.typ"
+    # Reference a line that could appear in typy_data; the key is the error message format
+    broken_typ.write_text(
+        f'#import "{typy_data}": typy_data\n#typy_data\n', encoding="utf-8"
+    )
+    output = tmp_path / "out.pdf"
+    with pytest.raises(Exception) as exc_info:
+        builder.compile(broken_typ, output)
+    assert "Typst compilation failed" in str(exc_info.value)
+
+
+# ---- Template field validation tests ----
+
+def test_add_template_field_with_unsupported_type_raises_type_error(tmp_path):
+    """Test that add_template raises TypeError with field context for unsupported types."""
+    from typy.templates import Template
+    from pydantic import ConfigDict
+
+    class BadTemplate(Template):
+        model_config = ConfigDict(arbitrary_types_allowed=True)
+        name: str
+        bad_field: object  # 'object' instances are not encodable
+
+        __template_name__ = "basic"
+        __template_path__ = BasicTemplate.__template_path__
+
+    # object() is not encodable; encoder should surface the field name
+    bad = BadTemplate(name="hello", bad_field=object())
+    builder = DocumentBuilder()
+    with pytest.raises(TypeError, match="bad_field"):
+        builder.add_template(bad)
+
+
+def test_add_template_valid_data_does_not_raise(basic_template):
+    """Test that add_template does not raise for a valid template."""
+    builder = DocumentBuilder()
+    # Should not raise
+    builder.add_template(basic_template)
+
+
+def test_get_source_context_no_line_refs():
+    """Test _get_source_context returns empty string when no line refs in error."""
+    builder = DocumentBuilder()
+    result = builder._get_source_context("Some generic error without line references")
+    assert result == ""
+
+
+def test_get_source_context_no_typy_data_file():
+    """Test _get_source_context returns empty string when typy_data.typ does not exist."""
+    builder = DocumentBuilder()
+    result = builder._get_source_context("--> main.typ:3:5 some error")
+    assert result == ""
+
+
+def test_get_source_context_with_typy_data_file(tmp_path):
+    """Test _get_source_context returns context when typy_data.typ exists and line ref present."""
+    builder = DocumentBuilder()
+    typy_data = Path(builder.tmp_dir.name) / "typy_data.typ"
+    typy_data.write_text("line1\nline2\nline3\nline4\nline5\n", encoding="utf-8")
+    result = builder._get_source_context("--> typy_data.typ:3:1 error")
+    assert "typy_data.typ" in result
+    assert "line3" in result
+
