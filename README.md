@@ -63,7 +63,7 @@ builder.add_template(template).save_pdf("basic.pdf")
 
 ### Result
 
-![Basic PDF](./example.png)
+![Basic PDF](./assets//example.png)
 
 
 ## Templates
