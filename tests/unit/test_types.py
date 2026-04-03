@@ -215,7 +215,9 @@ def test_pydantic_base_model_nested():
         name: str
         address: AddressModel
 
-    model = PersonModel(name="Bob", address=AddressModel(city="Berlin", zip_code="10115"))
+    model = PersonModel(
+        name="Bob", address=AddressModel(city="Berlin", zip_code="10115")
+    )
     result = TypstEncoder.encode(model)
     assert '"Bob"' in result
     assert '"Berlin"' in result
@@ -265,7 +267,10 @@ def test_dataclass_with_string_fields():
         name: str
         role: str
 
-    assert TypstEncoder.encode(Person("Alice", "admin")) == '(name: "Alice", role: "admin")'
+    assert (
+        TypstEncoder.encode(Person("Alice", "admin"))
+        == '(name: "Alice", role: "admin")'
+    )
 
 
 def test_dataclass_nested():

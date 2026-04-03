@@ -18,9 +18,7 @@ def _compile_encoded(encoded: str) -> bytes:
     with tempfile.TemporaryDirectory() as tmp_dir:
         typ_file = Path(tmp_dir) / "test.typ"
         out_file = Path(tmp_dir) / "test.pdf"
-        typ_file.write_text(
-            f"#let data = {encoded}\nDocument.", encoding="utf-8"
-        )
+        typ_file.write_text(f"#let data = {encoded}\nDocument.", encoding="utf-8")
         typst.compile(typ_file, output=out_file)
         return out_file.read_bytes()
 

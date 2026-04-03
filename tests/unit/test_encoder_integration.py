@@ -1,17 +1,12 @@
 """Integration tests: full pipeline from Python data to PDF using a self-contained template."""
 
-import tempfile
 from io import BytesIO
-from pathlib import Path
 
 import pytest
-import typst
 
 from typy.builder import DocumentBuilder
 from typy.content import Content
 from typy.templates import Template
-from typy.typst_encoder import TypstEncoder
-
 
 # ---- Self-contained template fixture ----
 # This template does not import any external Typst packages and therefore
@@ -86,7 +81,9 @@ def test_integration_to_buffer_returns_valid_pdf(builder_with_simple_template):
     assert content.startswith(b"%PDF-"), "Buffer does not contain PDF data"
 
 
-def test_integration_save_pdf_creates_valid_file(builder_with_simple_template, tmp_path):
+def test_integration_save_pdf_creates_valid_file(
+    builder_with_simple_template, tmp_path
+):
     """Full pipeline: template + data → PDF file that is non-empty and valid."""
     out = tmp_path / "integration_output.pdf"
     builder_with_simple_template.save_pdf(out)
@@ -111,14 +108,6 @@ def test_integration_pdf_content_consistency(builder_with_simple_template, tmp_p
 def test_integration_with_dict_data(simple_template_path, tmp_path):
     """Full pipeline using add_data with a plain dict instead of a Template."""
     SimpleTemplate.__template_path__ = simple_template_path
-    encoded = TypstEncoder.encode(
-        {
-            "title": "Dict Data Test",
-            "author": "Jane Doe",
-            "date": "2024-06-15",
-            "body": Content("Body from dict."),
-        }
-    )
     builder = DocumentBuilder()
     builder.add_template(
         SimpleTemplate(
