@@ -15,6 +15,17 @@ pydantic = "^2.11.3"
 [tool.poetry.group.tests.dependencies]
 pytest = "^8.3.4"
 
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^4.5.1"
+ruff = "^0.15.9"
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501"]
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

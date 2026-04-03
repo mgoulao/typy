@@ -1,9 +1,9 @@
 from datetime import datetime
 
 from typy.builder import DocumentBuilder
-from typy.markup import Heading
 from typy.content import Content
 from typy.functions import Lorem
+from typy.markup import Heading
 from typy.templates import PresentationTemplate
 
 builder = DocumentBuilder()

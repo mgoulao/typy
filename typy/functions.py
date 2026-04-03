@@ -1,9 +1,10 @@
 from datetime import datetime
 from pathlib import Path
-from typy.encodable import Encodable
-from typy.typst_encoder import TypstEncoder
-from typy.markup import Markup, Raw
+
 from typy.content import Content
+from typy.encodable import Encodable
+from typy.markup import Markup, Raw
+from typy.typst_encoder import TypstEncoder
 
 
 class Function(Encodable):

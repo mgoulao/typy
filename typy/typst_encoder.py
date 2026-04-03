@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Dict, List
 
 from pydantic import BaseModel
+
 from typy.encodable import Encodable
 
 
@@ -26,6 +27,7 @@ class TypstEncoder:
             return cls.encode_path(data)
         elif isinstance(data, datetime):
             from typy.functions import Datetime
+
             return Datetime(data).encode()
         elif isinstance(data, BaseModel):
             return cls.encode_pydantic_model(data)
@@ -53,7 +55,7 @@ class TypstEncoder:
     @classmethod
     def encode_string(cls, data: str) -> str:
         # Escape double quotes with backslash
-        data = data.replace('"', r'\"')
+        data = data.replace('"', r"\"")
         return f'"{data}"'
 
     @classmethod

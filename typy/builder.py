@@ -1,9 +1,9 @@
-from io import BytesIO
 import shutil
+import traceback
+from io import BytesIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Type
-import traceback
 
 import typst
 
