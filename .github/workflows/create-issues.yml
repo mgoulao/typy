@@ -1,0 +1,426 @@
+name: Create project issues
+
+on:
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  create-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create labels
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          create_label() {
+            local name="$1" color="$2" description="$3"
+            gh label create "$name" --color "$color" --description "$description" --repo "$REPO" 2>/dev/null \
+              || gh label edit "$name" --color "$color" --description "$description" --repo "$REPO" 2>/dev/null \
+              || true
+          }
+          create_label "bug"               "d73a4a" "Something isn't working"
+          create_label "enhancement"       "a2eeef" "New feature or request"
+          create_label "core"              "0075ca" "Core library functionality"
+          create_label "testing"           "e4e669" "Related to tests and coverage"
+          create_label "feature"           "84b6eb" "Brand-new capability"
+          create_label "template"          "c5def5" "Document template"
+          create_label "priority: critical" "b60205" "Must fix before release"
+          create_label "priority: high"    "e99695" "High priority"
+          create_label "priority: medium"  "f9d0c4" "Medium priority"
+
+      - name: Create milestones
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          create_milestone() {
+            local title="$1"
+            gh api "repos/$REPO/milestones" \
+              --method POST \
+              --field title="$title" \
+              --silent 2>/dev/null || true
+          }
+          create_milestone "v0.2.0"
+          create_milestone "v0.3.0"
+          create_milestone "v0.4.0"
+          create_milestone "v0.5.0"
+
+      - name: Get milestone IDs
+        id: milestones
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          get_milestone_number() {
+            local title="$1"
+            gh api "repos/$REPO/milestones" --jq ".[] | select(.title == \"$title\") | .number"
+          }
+          echo "v020=$(get_milestone_number 'v0.2.0')" >> "$GITHUB_OUTPUT"
+          echo "v030=$(get_milestone_number 'v0.3.0')" >> "$GITHUB_OUTPUT"
+          echo "v040=$(get_milestone_number 'v0.4.0')" >> "$GITHUB_OUTPUT"
+          echo "v050=$(get_milestone_number 'v0.5.0')" >> "$GITHUB_OUTPUT"
+
+      - name: Create Issue 1
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          MILESTONE: ${{ steps.milestones.outputs.v020 }}
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Stabilize the Typst encoder for core Python types" \
+            --label "bug,core,priority: critical" \
+            --milestone "$MILESTONE" \
+            --body "## Description
+
+The current Typst encoding layer is acknowledged as buggy and incomplete. Before any new features, the encoder needs to reliably handle the most common Python types that users will pass into templates and content blocks.
+
+## Acceptance criteria
+
+- [ ] \`str\` — correctly escaped for Typst (handles quotes, special characters, Unicode)
+- [ ] \`int\`, \`float\` — numeric literals
+- [ ] \`bool\` — mapped to Typst \`true\`/\`false\`
+- [ ] \`None\` — mapped to Typst \`none\`
+- [ ] \`list\` / \`tuple\` — mapped to Typst arrays
+- [ ] \`dict\` — mapped to Typst dictionaries
+- [ ] \`datetime\` / \`date\` — formatted as Typst datetime or string
+- [ ] \`pandas.DataFrame\` — mapped to Typst table data (already partially working via \`.to_dict()\`, but should be first-class)
+- [ ] Nested combinations of the above
+
+## Additional context
+
+Each type conversion should have corresponding unit tests with edge cases (empty strings, special characters, deeply nested structures, DataFrames with mixed dtypes). Consider creating a \`typy.encode\` module with a clear \`encode(value) -> str\` interface that the rest of the codebase uses consistently."
+
+      - name: Create Issue 2
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          MILESTONE: ${{ steps.milestones.outputs.v020 }}
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Improve error messages and validation in the encoder" \
+            --label "enhancement,core,priority: high" \
+            --milestone "$MILESTONE" \
+            --body "## Description
+
+When encoding fails or produces invalid Typst, the user currently gets opaque errors (or worse, silent corruption). The encoder should validate inputs and provide clear, actionable error messages.
+
+## Acceptance criteria
+
+- [ ] Unsupported types raise \`TypeError\` with a message like: \`\"Cannot encode type 'set' to Typst. Supported types: str, int, float, bool, list, dict, ...\"\`
+- [ ] Typst compilation errors are caught and surfaced with the relevant Typst source context (line number + snippet)
+- [ ] Template data validation: if a template expects \`str\` but receives \`int\`, raise early with a clear message rather than failing at Typst compile time
+- [ ] Add a \`--verbose\` / debug mode that prints the generated Typst source before compilation, for debugging template issues"
+
+      - name: Create Issue 3
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          MILESTONE: ${{ steps.milestones.outputs.v020 }}
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Add comprehensive test suite for the encoder" \
+            --label "testing,core,priority: high" \
+            --milestone "$MILESTONE" \
+            --body "## Description
+
+The encoder is the foundation of the entire library. It needs thorough test coverage before building anything on top of it.
+
+## Acceptance criteria
+
+- [ ] Unit tests for every supported type (see Issue #1)
+- [ ] Round-trip tests: Python value → Typst source → verify it compiles without error
+- [ ] Edge case tests: empty strings, very long strings, strings with Typst-reserved characters (\`#\`, \`\$\`, \`//\`, etc.), Unicode, emoji
+- [ ] DataFrame tests: empty DataFrame, single row, mixed dtypes, NaN handling, multi-index
+- [ ] Integration tests: full template render from Python data to PDF output (verify PDF is valid and non-empty)
+- [ ] CI setup: tests run on push via GitHub Actions"
+
+      - name: Create Issue 4
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          MILESTONE: ${{ steps.milestones.outputs.v030 }}
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Add markdown input support" \
+            --label "enhancement,feature,priority: high" \
+            --milestone "$MILESTONE" \
+            --body "## Description
+
+Markdown is the lingua franca for both humans and LLMs. Adding markdown as an input format dramatically lowers the barrier to entry — users don't need to learn Typst or typy's content API to generate beautiful documents.
+
+Typst has community packages that convert markdown to Typst markup (e.g., \`cmarker\`), making the implementation on the Typst side straightforward.
+
+## Acceptance criteria
+
+- [ ] New \`Markdown\` content type: \`Markdown(\"## Hello\n\nSome **bold** text\")\`
+- [ ] Works as a first-class content element anywhere \`Content\` is accepted (template body, figures, sections)
+- [ ] Supports standard CommonMark: headings, bold, italic, code blocks, links, images, lists, tables, blockquotes
+- [ ] Integrates a Typst markdown package (e.g., \`cmarker\`) transparently — the user never sees it
+- [ ] Example in README showing markdown usage
+
+## Example API
+
+\`\`\`python
+from typy.content import Markdown
+
+body = Markdown(\"\"\"
+## Results
+
+The analysis shows a **significant improvement** in performance.
+
+| Metric | Before | After |
+|--------|--------|-------|
+| Latency | 120ms | 45ms |
+| Throughput | 1000 | 3200 |
+\"\"\")
+
+builder.add_template(BasicTemplate(
+    title=\"Performance Report\",
+    body=body,
+)).save_pdf(\"report.pdf\")
+\`\`\`"
+
+      - name: Create Issue 5
+        id: issue5
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          MILESTONE: ${{ steps.milestones.outputs.v030 }}
+        run: |
+          URL=$(gh issue create \
+            --repo "$REPO" \
+            --title "Support markdown strings in template data fields" \
+            --label "enhancement,feature,priority: medium" \
+            --milestone "$MILESTONE" \
+            --body "## Description
+
+Beyond a standalone \`Markdown\` content block, template data fields that accept \`str\` should optionally accept markdown and convert it to rich Typst content. This is especially important for AI agent usage, where the agent will naturally produce markdown text.
+
+## Acceptance criteria
+
+- [ ] Template fields typed as \`Content\` accept raw markdown strings and auto-convert
+- [ ] Template fields typed as \`str\` remain plain strings (no conversion)
+- [ ] Explicit \`Markdown(...)\` wrapper always works as an override
+- [ ] Document the behavior clearly: when does auto-conversion happen vs. not
+
+## Dependencies
+
+Depends on #4 (Add markdown input support)")
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Create Issue 6
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          MILESTONE: ${{ steps.milestones.outputs.v040 }}
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Build template: Report" \
+            --label "template,enhancement" \
+            --milestone "$MILESTONE" \
+            --body "## Description
+
+Create a polished, general-purpose report template. This is the most common document type for both human users and AI agents.
+
+## Acceptance criteria
+
+- [ ] Template fields: \`title\`, \`subtitle\` (optional), \`author\`, \`date\`, \`body\` (Content), \`abstract\` (optional), \`toc\` (bool, default True)
+- [ ] Professional styling: clean typography, page numbers, headers/footers
+- [ ] Supports sections, subsections, figures, tables, and code blocks in body
+- [ ] Includes example in \`examples/\` directory
+- [ ] Template file in \`templates/report.typ\`"
+
+      - name: Create Issue 7
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          MILESTONE: ${{ steps.milestones.outputs.v040 }}
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Build template: Invoice" \
+            --label "template,enhancement" \
+            --milestone "$MILESTONE" \
+            --body "## Description
+
+Create an invoice template — one of the most requested document automation use cases.
+
+## Acceptance criteria
+
+- [ ] Template fields: \`company_name\`, \`company_address\`, \`client_name\`, \`client_address\`, \`invoice_number\`, \`date\`, \`due_date\`, \`items\` (list of dicts with description/quantity/unit_price), \`tax_rate\` (optional), \`notes\` (optional)
+- [ ] Auto-calculated subtotal, tax, and total
+- [ ] Clean, professional layout with logo support (optional image field)
+- [ ] Includes example in \`examples/\` directory"
+
+      - name: Create Issue 8
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          MILESTONE: ${{ steps.milestones.outputs.v040 }}
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Build template: Letter" \
+            --label "template,enhancement" \
+            --milestone "$MILESTONE" \
+            --body "## Description
+
+Create a formal letter template.
+
+## Acceptance criteria
+
+- [ ] Template fields: \`sender_name\`, \`sender_address\`, \`recipient_name\`, \`recipient_address\`, \`date\`, \`subject\`, \`body\`, \`closing\` (default \"Sincerely\"), \`signature_name\`
+- [ ] Standard business letter layout
+- [ ] Optional letterhead/logo support
+- [ ] Includes example in \`examples/\` directory"
+
+      - name: Create Issue 9
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          MILESTONE: ${{ steps.milestones.outputs.v040 }}
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Build template: CV / Resume" \
+            --label "template,enhancement" \
+            --milestone "$MILESTONE" \
+            --body "## Description
+
+Create a CV/resume template. High demand from both individuals and AI-assisted resume builders.
+
+## Acceptance criteria
+
+- [ ] Template fields: \`name\`, \`contact\` (email, phone, location, links), \`summary\` (optional), \`experience\` (list), \`education\` (list), \`skills\` (list), \`languages\` (optional), \`certifications\` (optional)
+- [ ] Modern, clean single-column or two-column layout
+- [ ] Includes example in \`examples/\` directory"
+
+      - name: Create Issue 10
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          MILESTONE: ${{ steps.milestones.outputs.v040 }}
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Build template: Academic paper" \
+            --label "template,enhancement" \
+            --milestone "$MILESTONE" \
+            --body "## Description
+
+Create an academic paper template targeting researchers who want to replace LaTeX with Typst.
+
+## Acceptance criteria
+
+- [ ] Template fields: \`title\`, \`authors\` (list with name/affiliation), \`abstract\`, \`keywords\`, \`body\`, \`bibliography\` (optional path to .bib file)
+- [ ] Standard academic formatting: two-column option, numbered sections, figure/table numbering
+- [ ] Citation support via Typst's built-in bibliography system
+- [ ] Includes example in \`examples/\` directory"
+
+      - name: Create Issue 11
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          MILESTONE: ${{ steps.milestones.outputs.v040 }}
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Build template: Presentation (slides)" \
+            --label "template,enhancement" \
+            --milestone "$MILESTONE" \
+            --body "## Description
+
+Create a presentation/slide deck template, building on the existing \`diatypst\` integration shown in the README.
+
+## Acceptance criteria
+
+- [ ] Template fields: \`title\`, \`subtitle\` (optional), \`author\`, \`date\`, \`slides\` (list of slide content)
+- [ ] Each slide supports: title, body content (text, images, lists, code), speaker notes
+- [ ] 16:9 aspect ratio by default
+- [ ] Clean, minimal styling
+- [ ] Includes example in \`examples/\` directory"
+
+      - name: Create Issue 12
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          MILESTONE: ${{ steps.milestones.outputs.v050 }}
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "CLI — \`typy render\` command" \
+            --label "enhancement,feature,priority: high" \
+            --milestone "$MILESTONE" \
+            --body "## Description
+
+Add a CLI interface for rendering documents. This is essential for scriptability, CI/CD pipelines, and AI agents that execute shell commands.
+
+## Acceptance criteria
+
+- [ ] \`typy render --template <name-or-path> --data <data.json> --output <out.pdf>\` — render a template with JSON data
+- [ ] \`--template\` accepts either a built-in template name (\`report\`, \`invoice\`, etc.) or a path to a custom \`.typ\` template file
+- [ ] \`typy render --markdown <input.md> --output <out.pdf>\` — render a markdown file to PDF with default styling
+- [ ] \`typy render --markdown <input.md> --template <name>\` — render markdown using a specific template (markdown goes into the template's body field)
+- [ ] \`--output\` supports \`.pdf\` (default), and later \`.png\`, \`.svg\`
+- [ ] Sensible defaults: if \`--output\` is omitted, default to \`output.pdf\`
+- [ ] Exit codes: 0 on success, 1 on error with stderr message
+
+## Dependencies
+
+Depends on #4 (markdown), #6–#11 (templates)
+
+## Example usage
+
+\`\`\`bash
+# Render a report template with JSON data
+typy render --template report --data report_data.json --output report.pdf
+
+# Render a markdown file to PDF
+typy render --markdown notes.md --output notes.pdf
+
+# Render markdown with a specific template
+typy render --markdown notes.md --template report --output notes.pdf
+\`\`\`"
+
+      - name: Create Issue 13
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          MILESTONE: ${{ steps.milestones.outputs.v050 }}
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "CLI — \`typy list\` and \`typy info\` commands" \
+            --label "enhancement,feature" \
+            --milestone "$MILESTONE" \
+            --body "## Description
+
+Discovery commands for the CLI so users (and AI agents) can explore available templates and their schemas.
+
+## Acceptance criteria
+
+- [ ] \`typy list\` — list all available built-in templates with a one-line description
+- [ ] \`typy info <template-name>\` — show the full schema for a template (fields, types, required/optional)
+- [ ] Machine-readable output: \`--json\` flag for both commands
+- [ ] Help text is clear and includes examples
+
+## Dependencies
+
+Depends on #6–#11 (templates)"
+
+      - name: Delete this workflow
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh api "repos/$REPO/actions/workflows" --jq '.workflows[] | select(.path == ".github/workflows/create-issues.yml") | .id' \
+            | xargs -I{} gh api "repos/$REPO/actions/workflows/{}" --method DELETE 2>/dev/null || true
