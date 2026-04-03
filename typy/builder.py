@@ -1,7 +1,7 @@
-from io import BytesIO
-from pathlib import Path
 import re
 import shutil
+from io import BytesIO
+from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Type
 
@@ -49,7 +49,9 @@ class DocumentBuilder:
         data_str = f"#let typy_data = {encoded}\n"
 
         if self.verbose:
-            print(f"[typy] Generated Typst data source for template '{template_name}':\n{data_str}")
+            print(
+                f"[typy] Generated Typst data source for template '{template_name}':\n{data_str}"
+            )
 
         with open(
             Path(self.tmp_dir.name) / "typy_data.typ", "w", encoding="utf-8"

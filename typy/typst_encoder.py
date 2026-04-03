@@ -52,9 +52,9 @@ class TypstEncoder:
         elif isinstance(data, Encodable):
             return data.encode()
         else:
-            supported = ", ".join(
-                t.__name__ for t in cls.SUPPORTED_TYPES
-            ) + ", None, dataclass"
+            supported = (
+                ", ".join(t.__name__ for t in cls.SUPPORTED_TYPES) + ", None, dataclass"
+            )
             raise TypeError(
                 f"Cannot encode type '{type(data).__name__}' to Typst. "
                 f"Supported types: {supported}"

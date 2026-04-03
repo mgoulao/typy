@@ -186,6 +186,7 @@ def test_to_buffer_without_template():
 
 # ---- Verbose mode tests ----
 
+
 def test_verbose_mode_prints_data_source_on_add_template(basic_template, capsys):
     """Test that verbose mode prints the generated Typst data source on add_template."""
     builder = DocumentBuilder(verbose=True)
@@ -213,6 +214,7 @@ def test_non_verbose_mode_does_not_print(basic_template, capsys):
 
 
 # ---- Compilation error context tests ----
+
 
 def test_compilation_error_wrapped_with_message(tmp_path):
     """Test that compilation errors are wrapped with 'Typst compilation failed' prefix."""
@@ -245,10 +247,12 @@ def test_compilation_error_includes_source_context(tmp_path):
 
 # ---- Template field validation tests ----
 
+
 def test_add_template_field_with_unsupported_type_raises_type_error(tmp_path):
     """Test that add_template raises TypeError with field context for unsupported types."""
-    from typy.templates import Template
     from pydantic import ConfigDict
+
+    from typy.templates import Template
 
     class BadTemplate(Template):
         model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -294,4 +298,3 @@ def test_get_source_context_with_typy_data_file(tmp_path):
     result = builder._get_source_context("--> typy_data.typ:3:1 error")
     assert "typy_data.typ" in result
     assert "line3" in result
-
