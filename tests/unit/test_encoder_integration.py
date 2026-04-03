@@ -6,6 +6,7 @@ import pytest
 
 from typy.builder import DocumentBuilder
 from typy.content import Content
+from typy.encodable import Encodable
 from typy.templates import Template
 
 # ---- Self-contained template fixture ----
@@ -34,7 +35,7 @@ class SimpleTemplate(Template):
     title: str
     author: str
     date: str
-    body: Content
+    body: Encodable
 
     __template_name__ = "simple_test"
     # template path is set dynamically in the fixture

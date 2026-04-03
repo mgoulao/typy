@@ -29,3 +29,9 @@ class Heading(Markup):
 
     def encode(self):
         return f"{'=' * self.level} {self.text}\n"
+
+
+class Markdown(Markup):
+    def encode(self):
+        text = self.text.replace("\\", "\\\\").replace('"', '\\"')
+        return f'[#{{ import "@preview/cmarker:0.1.8": render; render("{text}") }}]'

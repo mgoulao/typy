@@ -113,6 +113,11 @@ class DocumentBuilder:
                 typ_file,
                 output=output,
             )
+        except typst.TypstError as e:
+            error_message = str(e)
+            context = self._get_source_context(error_message)
+            e.args = (f"Typst compilation failed: {error_message}{context}",)
+            raise
         except Exception as e:
             error_message = str(e)
             context = self._get_source_context(error_message)
