@@ -126,6 +126,48 @@ class CustomTemplate(Template):
 ```
 
 
-## Typst encoding
+## Markdown support
+
+You can use `Markdown` content anywhere a body or content is accepted. Markdown is rendered via the [`cmarker`](https://typst.app/universe/package/cmarker) Typst package — no Typst knowledge required.
+
+```python
+from typy.builder import DocumentBuilder
+from typy.markup import Markdown
+from typy.templates import BasicTemplate
+
+body = Markdown("""
+## Results
+
+The analysis shows a **significant improvement** in performance.
+
+| Metric | Before | After |
+|--------|--------|-------|
+| Latency | 120ms | 45ms |
+| Throughput | 1000 | 3200 |
+""")
+
+builder = DocumentBuilder()
+builder.add_template(BasicTemplate(
+    title="Performance Report",
+    date="2024-01-01",
+    author="Jane Doe",
+    body=body,
+)).save_pdf("report.pdf")
+```
+
+`Markdown` supports standard CommonMark: headings, bold, italic, code blocks, links, images, lists, tables, and blockquotes. It also works inside a `Content` block alongside other elements:
+
+```python
+from typy.content import Content
+from typy.markup import Markdown, Text
+
+body = Content([
+    Text("Summary: "),
+    Markdown("## Details\n\nSee the **table** below."),
+])
+```
+
+
+
 
 The current code to encode the data into Typst markup is still very basic and only supports a few types, functions, and markup elements. **Most importantly, it is very buggy.**
