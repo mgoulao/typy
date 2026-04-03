@@ -34,7 +34,7 @@ jobs:
 
       - name: Get new version
         id: version
-        run: echo "version=$(uv version)" >> "$GITHUB_OUTPUT"
+        run: echo "version=$(uv version | awk '{print $NF}')" >> "$GITHUB_OUTPUT"
 
       - name: Commit and tag
         run: |
