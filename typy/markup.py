@@ -29,5 +29,3 @@ class Heading(Markup):
 
     def encode(self):
         return f"{'=' * self.level} {self.text}\n"
-
-

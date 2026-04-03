@@ -1,5 +1,6 @@
-from typy.typst_encoder import TypstEncoder
 import pytest
+
+from typy.typst_encoder import TypstEncoder
 
 
 @pytest.mark.parametrize(
