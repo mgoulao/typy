@@ -1,11 +1,14 @@
 import dataclasses
 from datetime import date, datetime
 from pathlib import Path
-from typing import Dict, List
+from typing import TYPE_CHECKING, Dict, List
 
 from pydantic import BaseModel
 
 from typy.encodable import Encodable
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 class TypstEncoder:
