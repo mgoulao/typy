@@ -1,11 +1,14 @@
 import dataclasses
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
-from typing import Dict, List
+from typing import TYPE_CHECKING, Dict, List
 
 from pydantic import BaseModel
 
 from typy.encodable import Encodable
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 class TypstEncoder:
@@ -35,7 +38,7 @@ class TypstEncoder:
             return cls.encode_float(data)
         elif isinstance(data, int):
             return cls.encode_int(data)
-        elif isinstance(data, list) or isinstance(data, tuple):
+        elif isinstance(data, (list, tuple)):
             return cls.encode_list(data)
         elif isinstance(data, Path):
             return cls.encode_path(data)
@@ -43,15 +46,27 @@ class TypstEncoder:
             from typy.functions import Datetime
 
             return Datetime(data).encode()
+        elif isinstance(data, date):
+            from typy.functions import Datetime
+
+            return Datetime(data).encode()
         elif isinstance(data, BaseModel):
             return cls.encode_pydantic_model(data)
         elif data is None:
-            return "null"
+            return "none"
         elif dataclasses.is_dataclass(data):
             return cls.encode(data.__dict__)
         elif isinstance(data, Encodable):
             return data.encode()
         else:
+            try:
+                import pandas as pd
+
+                if isinstance(data, pd.DataFrame):
+                    return cls.encode_dataframe(data)
+            except ImportError:
+                pass
+
             supported = (
                 ", ".join(t.__name__ for t in cls.SUPPORTED_TYPES) + ", None, dataclass"
             )
@@ -70,12 +85,15 @@ class TypstEncoder:
         items = [cls.encode(item) for item in data]
         if not items:
             return "()"
-        return f"({', '.join(items)},)"
+        if len(items) == 1:
+            return f"({items[0]},)"
+        return f"({', '.join(items)})"
 
     @classmethod
     def encode_string(cls, data: str) -> str:
-        # Escape double quotes with backslash
-        data = data.replace('"', r"\"")
+        # Escape backslashes first, then double quotes
+        data = data.replace("\\", "\\\\")
+        data = data.replace('"', '\\"')
         return f'"{data}"'
 
     @classmethod
@@ -93,3 +111,10 @@ class TypstEncoder:
     @classmethod
     def encode_pydantic_model(cls, data: BaseModel) -> str:
         return cls.encode(data.model_dump())
+
+    @classmethod
+    def encode_dataframe(cls, data: "pd.DataFrame") -> str:
+        # Convert DataFrame to Typst table via to_dict() (column-oriented format)
+        from typy.functions import Table
+
+        return Table(data.to_dict()).encode()
