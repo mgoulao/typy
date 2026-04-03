@@ -63,9 +63,12 @@ class Table(Function):
 
         data_encoded = "table.header(\n"
         # Headers
-        data_encoded += (
-            "    " + ", ".join(f"[*{header}*]" for header in headers) + ",\n  ),\n"
-        )
+        if headers:
+            data_encoded += (
+                "    " + ", ".join(f"[*{header}*]" for header in headers) + ",\n  ),\n"
+            )
+        else:
+            data_encoded += "  ),\n"
         # Rows
         for row in rows:
             data_encoded += "  " + ", ".join(f"[{cell}]" for cell in row) + ",\n"
