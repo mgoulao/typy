@@ -8,6 +8,20 @@ from typy.encodable import Encodable
 
 
 class TypstEncoder:
+    SUPPORTED_TYPES = (
+        dict,
+        str,
+        bool,
+        float,
+        int,
+        list,
+        tuple,
+        Path,
+        datetime,
+        BaseModel,
+        Encodable,
+    )
+
     @classmethod
     def encode(cls, data):
         if isinstance(data, dict):
@@ -36,10 +50,12 @@ class TypstEncoder:
         elif isinstance(data, Encodable):
             return data.encode()
         else:
+            supported = ", ".join(
+                t.__name__ for t in cls.SUPPORTED_TYPES
+            ) + ", None, dataclass"
             raise TypeError(
                 f"Cannot encode type '{type(data).__name__}' to Typst. "
-                f"Supported types: str, int, float, bool, list, tuple, dict, Path, "
-                f"datetime, None, dataclass, BaseModel, Encodable"
+                f"Supported types: {supported}"
             )
 
     @classmethod
