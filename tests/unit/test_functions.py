@@ -7,7 +7,7 @@ from typy.markup import Raw
 def test_table_encode_simple():
     data = {"Name": {0: "Alice", 1: "Bob"}, "Age": {0: 30, 1: 25}}
     table = Table(data)
-    expected_output = """table(columns:(auto, auto,), table.header(
+    expected_output = """table(columns:(auto, auto), table.header(
     [*Name*], [*Age*],
   ),
   [Alice], [30],
