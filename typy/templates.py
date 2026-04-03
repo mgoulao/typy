@@ -3,7 +3,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
 
-from typy.encodable import Encodable
+from typy.content import Content
 
 
 class Template(BaseModel):
@@ -36,7 +36,7 @@ class LetterTemplate(Template):
     date: str
     subject: str
     signer: str
-    body: Encodable
+    body: Content
 
     __template_name__ = "letter"
     __template_path__ = Path(__file__).parent.parent / "templates" / "letter.typ"
@@ -84,8 +84,8 @@ class PresentationTemplate(Template):
     date: str
     authors: list[str]
     toc: bool
-    section1: Encodable
-    section2: Encodable
+    section1: Content
+    section2: Content
 
     __template_name__ = "presentation"
     __template_path__ = Path(__file__).parent.parent / "templates" / "presentation.typ"
@@ -98,7 +98,7 @@ class BasicTemplate(Template):
     title: str
     date: str
     author: str
-    body: Encodable
+    body: Content
 
     __template_name__ = "basic"
     __template_path__ = Path(__file__).parent.parent / "templates" / "basic.typ"

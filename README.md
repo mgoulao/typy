@@ -167,6 +167,48 @@ body = Content([
 ])
 ```
 
+### Auto-conversion of raw strings in `Content` fields
+
+Template fields typed as `Content` automatically convert a raw Python string to a `Markdown` object, so AI-generated or otherwise markdown-formatted text can be passed directly without any wrapper:
+
+```python
+from typy.templates import BasicTemplate
+
+# Passing a raw string — auto-converted to Markdown
+template = BasicTemplate(
+    title="Report",       # str field: stays a plain string, NOT converted
+    date="2024-01-01",
+    author="Jane Doe",
+    body="## Summary\n\nThis text is **automatically** rendered as markdown.",
+    # ^^^ Content field: raw string is wrapped in Markdown(...)
+)
+```
+
+**Rules:**
+
+| Field type | Input | Result |
+|------------|-------|--------|
+| `Content`  | `str` | auto-converted to `Markdown(str)` and rendered via cmarker |
+| `Content`  | `Content(...)` | passed through unchanged |
+| `Content`  | `Markdown(...)` | passed through as a `Content` wrapping the `Markdown` |
+| `str`      | `str` | stays a plain string — never converted |
+
+An explicit `Markdown(...)` wrapper always works as an override and is passed through unchanged:
+
+```python
+from typy.markup import Markdown
+from typy.templates import BasicTemplate
+
+template = BasicTemplate(
+    title="Report",
+    date="2024-01-01",
+    author="Jane Doe",
+    body=Markdown("## Override\n\nExplicit wrapper still works."),
+)
+```
+
+
+
 
 
 
