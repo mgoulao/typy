@@ -1,12 +1,8 @@
 """Tests for auto-conversion of markdown strings in Content fields."""
 
-import pytest
-from pydantic import ValidationError
-
 from typy.content import Content
 from typy.markup import Markdown, Text
 from typy.templates import BasicTemplate
-
 
 # ---- Content constructor: no auto-conversion ----
 

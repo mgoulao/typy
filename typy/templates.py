@@ -4,7 +4,6 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict
 
 from typy.content import Content
-from typy.encodable import Encodable
 
 
 class Template(BaseModel):
