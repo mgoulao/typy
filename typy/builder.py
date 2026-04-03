@@ -1,5 +1,5 @@
+import re
 import shutil
-import traceback
 from io import BytesIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -12,9 +12,10 @@ from typy.typst_encoder import TypstEncoder
 
 
 class DocumentBuilder:
-    def __init__(self):
+    def __init__(self, verbose: bool = False):
         self.tmp_dir = TemporaryDirectory()
         self.template: Template = None
+        self.verbose = verbose
 
     def add_template(self, template: Template):
         typy_module = Path(__file__).parent / "static" / "typy.typ"
@@ -33,7 +34,24 @@ class DocumentBuilder:
             )
         shutil.copy(typy_module, Path(self.tmp_dir.name) / "typy.typ")
 
-        data_str = f"#let typy_data = {TypstEncoder.encode(template.get_data())}\n"
+        template_name = type(template).__name__
+        data = template.get_data()
+        for field_name, value in data.items():
+            try:
+                TypstEncoder.encode(value)
+            except TypeError as e:
+                raise TypeError(
+                    f"Failed to encode field '{field_name}' of template "
+                    f"'{template_name}': {e}"
+                ) from e
+
+        encoded = TypstEncoder.encode(data)
+        data_str = f"#let typy_data = {encoded}\n"
+
+        if self.verbose:
+            print(
+                f"[typy] Generated Typst data source for template '{template_name}':\n{data_str}"
+            )
 
         with open(
             Path(self.tmp_dir.name) / "typy_data.typ", "w", encoding="utf-8"
@@ -46,7 +64,11 @@ class DocumentBuilder:
         return self.template.datamodel
 
     def add_data(self, data: dict | Template):
-        data_str = f"#let typy_data = {TypstEncoder.encode(data)}\n"
+        encoded = TypstEncoder.encode(data)
+        data_str = f"#let typy_data = {encoded}\n"
+
+        if self.verbose:
+            print(f"[typy] Generated Typst data source:\n{data_str}")
 
         with open(
             Path(self.tmp_dir.name) / "typy_data.typ", "w", encoding="utf-8"
@@ -60,18 +82,42 @@ class DocumentBuilder:
             Path(self.tmp_dir.name)
         )
 
+    def _get_source_context(self, error_message: str) -> str:
+        """Extract source context (line number + snippet) from a Typst error message."""
+        line_refs = re.findall(r"-->.*?:(\d+):\d+", error_message)
+        if not line_refs:
+            return ""
+
+        typy_data_file = Path(self.tmp_dir.name) / "typy_data.typ"
+        if not typy_data_file.exists():
+            return ""
+
+        lines = typy_data_file.read_text(encoding="utf-8").splitlines()
+        context_parts = ["\n\nGenerated Typst source context (typy_data.typ):"]
+        for ref in line_refs:
+            line_num = int(ref) - 1
+            start = max(0, line_num - 2)
+            end = min(len(lines), line_num + 3)
+            for i in range(start, end):
+                marker = ">" if i == line_num else " "
+                context_parts.append(f"  {marker} {i + 1:3d} | {lines[i]}")
+        return "\n".join(context_parts)
+
     def compile(self, typ_file: Path, output: Path):
+        if self.verbose and typ_file.exists():
+            print(f"[typy] Compiling: {typ_file}")
+            print(f"[typy] Source:\n{typ_file.read_text(encoding='utf-8')}")
+
         try:
             typst.compile(
                 typ_file,
                 output=output,
             )
         except Exception as e:
-            print("Error while compiling the document:")
-            traceback.print_exc()
-            if typ_file.exists():
-                print(f"Typst file content ({typ_file}):")
-            raise e
+            error_message = str(e)
+            context = self._get_source_context(error_message)
+            e.args = (f"Typst compilation failed: {error_message}{context}",)
+            raise
 
         return self
 
