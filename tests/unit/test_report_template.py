@@ -43,18 +43,14 @@ def test_report_template_required_fields():
 
 def test_report_template_optional_fields_default_to_none():
     """Test that optional fields subtitle and abstract default to None."""
-    t = ReportTemplate(
-        title="T", author="A", date="D", body=Content(Lorem(10))
-    )
+    t = ReportTemplate(title="T", author="A", date="D", body=Content(Lorem(10)))
     assert t.subtitle is None
     assert t.abstract is None
 
 
 def test_report_template_toc_defaults_to_true():
     """Test that toc defaults to True."""
-    t = ReportTemplate(
-        title="T", author="A", date="D", body=Content(Lorem(10))
-    )
+    t = ReportTemplate(title="T", author="A", date="D", body=Content(Lorem(10)))
     assert t.toc is True
 
 
