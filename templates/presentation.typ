@@ -8,17 +8,23 @@
   title: typy("title", "str"),
   subtitle: typy("subtitle", "str"),
   date: typy("date", "str"),
-  authors: typy("authors", "array"),
+  authors: (typy("author", "str"),),
   ratio: 16/9,
   layout: "medium",
   title-color: blue.darken(60%),
-  toc: typy("toc", "bool"),
+  toc: false,
 )
 
-= First Section
+#for slide in typy("slides", "array") [
+  == #slide.title
 
-#typy("section1", "content")
+  #slide.body
 
-= Second Section
-
-#typy("section2", "content")
+  #if slide.notes != none [
+    #place(bottom + left, dy: -0.5em)[
+      #line(length: 100%, stroke: 0.5pt + luma(180))
+      #set text(size: 0.65em, fill: luma(100), style: "italic")
+      *Notes:* #slide.notes
+    ]
+  ]
+]

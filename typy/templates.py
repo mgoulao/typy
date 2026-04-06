@@ -1,5 +1,6 @@
 from datetime import datetime
 from pathlib import Path
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -78,14 +79,20 @@ class InvoiceTemplate(Template):
 # =================
 # Presentation template
 # =================
+class Slide(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    title: str
+    body: Content
+    notes: Optional[str] = None
+
+
 class PresentationTemplate(Template):
     title: str
-    subtitle: str
+    subtitle: Optional[str] = None
+    author: str
     date: str
-    authors: list[str]
-    toc: bool
-    section1: Content
-    section2: Content
+    slides: list[Slide]
 
     __template_name__ = "presentation"
     __template_path__ = Path(__file__).parent.parent / "templates" / "presentation.typ"
