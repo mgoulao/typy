@@ -162,7 +162,8 @@ class CVTemplate(Template):
 
     __template_name__ = "cv"
     __template_path__ = Path(__file__).parent.parent / "templates" / "cv.typ"
-    
+
+
 # =================
 # Report template
 # =================
