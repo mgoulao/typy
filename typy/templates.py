@@ -1,5 +1,6 @@
 from datetime import datetime
 from pathlib import Path
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -102,3 +103,19 @@ class BasicTemplate(Template):
 
     __template_name__ = "basic"
     __template_path__ = Path(__file__).parent.parent / "templates" / "basic.typ"
+
+
+# =================
+# Report template
+# =================
+class ReportTemplate(Template):
+    title: str
+    subtitle: Optional[str] = None
+    author: str
+    date: str
+    body: Content
+    abstract: Optional[Content] = None
+    toc: bool = True
+
+    __template_name__ = "report"
+    __template_path__ = Path(__file__).parent.parent / "templates" / "report.typ"
