@@ -1,12 +1,9 @@
 """Unit tests for the Slide model and PresentationTemplate."""
 
-import pytest
-
 from typy.content import Content
 from typy.markup import Raw
 from typy.templates import PresentationTemplate, Slide
 from typy.typst_encoder import TypstEncoder
-
 
 # ---- Slide model encoding ----
 
