@@ -1,4 +1,3 @@
-from datetime import datetime
 from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
@@ -47,29 +46,22 @@ class LetterTemplate(Template):
 # =================
 class InvoiceItem(BaseModel):
     description: str
-    price: float
+    quantity: float
+    unit_price: float
 
 
 class InvoiceTemplate(Template):
-    invoice_nr: str
-    invoice_date: datetime
+    company_name: str
+    company_address: str
+    client_name: str
+    client_address: str
+    invoice_number: str
+    date: str
+    due_date: str
     items: list[InvoiceItem]
-    author_name: str
-    author_street: str
-    author_zip: str
-    author_city: str
-    author_tax_nr: str
-    author_signature: Path
-    recipient_name: str
-    recipient_street: str
-    recipient_zip: str
-    recipient_city: str
-    account_holder: str
-    account_bank: str
-    account_iban: str
-    account_bic: str
-    vat: str
-    kleinunternehmer: bool
+    tax_rate: float | None = None
+    notes: str | None = None
+    logo: Path | None = None
 
     __template_name__ = "invoice"
     __template_path__ = Path(__file__).parent.parent / "templates" / "invoice.typ"
