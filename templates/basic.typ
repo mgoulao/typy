@@ -1,4 +1,3 @@
-#import "@preview/classy-german-invoice:0.3.1": invoice
 #import "typy.typ": init_typy
 #import "typy_data.typ": typy_data
 

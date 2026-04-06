@@ -1,37 +1,64 @@
-#import "@preview/pro-letter:0.1.1": pro-letter
-
 #import "typy.typ": init_typy
 #import "typy_data.typ": typy_data
 
 #let typy = init_typy(typy_data)
 
-#show: pro-letter.with(
-  sender: (
-    name: typy("sender_name", "str"),
-    street: typy("sender_street", "str"),
-    city: typy("sender_city", "str"),
-    state: typy("sender_state", "str"),
-    zip: typy("sender_zip", "str"),
-    phone: typy("sender_phone", "str"),
-    email: typy("sender_email", "str"),
-  ),
+#let logo_path = typy("logo", "str")
+#let has_logo = logo_path != ""
 
-  recipient: (
-    company: typy("recipient_company", "str"),
-    attention: typy("recipient_attention", "str"),
-    street: typy("recipient_street", "str"),
-    city: typy("recipient_city", "str"),
-    state: typy("recipient_state", "str"),
-    zip: typy("recipient_zip", "str"),
-  ),
+#set page(margin: (top: 2.5cm, bottom: 2.5cm, left: 2.5cm, right: 2.5cm))
+#set text(font: "New Computer Modern", size: 11pt)
+#set par(leading: 0.65em)
 
-  date: typy("date", "str"),
+// Letterhead
+#if has_logo [
+  #grid(
+    columns: (1fr, auto),
+    align(left)[
+      *#typy("sender_name", "str")* \
+      #typy("sender_address", "str")
+    ],
+    image(logo_path, height: 2.5cm),
+  )
+] else [
+  *#typy("sender_name", "str")* \
+  #typy("sender_address", "str")
+]
 
-  subject: typy("subject", "str"),
+#v(1cm)
+#line(length: 100%, stroke: 0.5pt)
+#v(0.5cm)
 
-  signer: typy("signer", "str"),
+// Date
+#typy("date", "str")
 
-  attachments: "",
-)
+#v(0.8cm)
 
+// Recipient
+*#typy("recipient_name", "str")* \
+#typy("recipient_address", "str")
+
+#v(0.8cm)
+
+// Subject
+*Re: #typy("subject", "str")*
+
+#v(0.8cm)
+
+// Salutation
+Dear #typy("recipient_name", "str"),
+
+#v(0.4cm)
+
+// Body
 #typy("body", "content")
+
+#v(0.8cm)
+
+// Closing
+#typy("closing", "str")
+
+#v(1.5cm)
+
+// Signature
+#typy("signature_name", "str")

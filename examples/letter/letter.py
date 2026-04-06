@@ -25,22 +25,14 @@ Thank you for your prompt attention to this magical matter.""")
 
 template = LetterTemplate(
     sender_name="John Doe",
-    sender_street="123 Main St",
-    sender_city="Anytown",
-    sender_state="CA",
-    sender_zip="12345",
-    sender_phone="555-1234",
-    sender_email="john.doe@example.com",
-    recipient_company="Jane Smith Inc.",
-    recipient_attention="Jane Smith",
-    recipient_street="456 Elm St",
-    recipient_city="Othertown",
-    recipient_state="NY",
-    recipient_zip="67890",
-    date="2023-01-01",
-    subject="Invoice INV-2023-001",
-    signer="John Doe",
+    sender_address="123 Main St\nAnytown, CA 12345",
+    recipient_name="Jane Smith",
+    recipient_address="Jane Smith Inc.\n456 Elm St\nOthertown, NY 67890",
+    date="January 1, 2023",
+    subject="Account Closure Request",
     body=body,
+    closing="Sincerely",
+    signature_name="John Doe",
 )
 
 builder.add_template(template)
