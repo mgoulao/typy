@@ -57,9 +57,7 @@ def full_cv_template():
         ],
         skills=["Python", "Go", "Kubernetes"],
         languages=[CVLanguage(name="English", level="Native")],
-        certifications=[
-            CVCertification(name="AWS SAA", issuer="Amazon", date="2022")
-        ],
+        certifications=[CVCertification(name="AWS SAA", issuer="Amazon", date="2022")],
     )
 
 
