@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -74,6 +75,27 @@ class PresentationTemplate(Template):
 
     __template_name__ = "presentation"
     __template_path__ = Path(__file__).parent.parent / "templates" / "presentation.typ"
+
+
+# =================
+# Academic template
+# =================
+class AcademicAuthor(BaseModel):
+    name: str
+    affiliation: str = ""
+
+
+class AcademicTemplate(Template):
+    title: str
+    authors: list[AcademicAuthor]
+    abstract: str
+    keywords: list[str]
+    body: Content
+    two_column: bool = False
+    bibliography_path: Optional[Path] = None
+
+    __template_name__ = "academic"
+    __template_path__ = Path(__file__).parent.parent / "templates" / "academic.typ"
 
 
 # =================
