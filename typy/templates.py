@@ -112,6 +112,59 @@ class BasicTemplate(Template):
 
 
 # =================
+# CV / Resume template
+# =================
+class CVContact(BaseModel):
+    email: str = ""
+    phone: str = ""
+    location: str = ""
+    links: list[str] = []
+
+
+class CVExperience(BaseModel):
+    title: str
+    company: str
+    start_date: str
+    end_date: str
+    location: str = ""
+    description: str = ""
+
+
+class CVEducation(BaseModel):
+    degree: str
+    institution: str
+    start_date: str
+    end_date: str
+    location: str = ""
+    description: str = ""
+
+
+class CVLanguage(BaseModel):
+    name: str
+    level: str
+
+
+class CVCertification(BaseModel):
+    name: str
+    issuer: str
+    date: str
+
+
+class CVTemplate(Template):
+    name: str
+    contact: CVContact
+    summary: str = ""
+    experience: list[CVExperience]
+    education: list[CVEducation]
+    skills: list[str]
+    languages: list[CVLanguage] = []
+    certifications: list[CVCertification] = []
+
+    __template_name__ = "cv"
+    __template_path__ = Path(__file__).parent.parent / "templates" / "cv.typ"
+
+
+# =================
 # Report template
 # =================
 class ReportTemplate(Template):
