@@ -20,22 +20,15 @@ class Template(BaseModel):
 # =================
 class LetterTemplate(Template):
     sender_name: str
-    sender_street: str
-    sender_city: str
-    sender_state: str
-    sender_zip: str
-    sender_phone: str
-    sender_email: str
-    recipient_company: str
-    recipient_attention: str
-    recipient_street: str
-    recipient_city: str
-    recipient_state: str
-    recipient_zip: str
+    sender_address: str
+    recipient_name: str
+    recipient_address: str
     date: str
     subject: str
-    signer: str
     body: Content
+    closing: str = "Sincerely"
+    signature_name: str
+    logo: str = ""
 
     __template_name__ = "letter"
     __template_path__ = Path(__file__).parent.parent / "templates" / "letter.typ"
