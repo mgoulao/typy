@@ -197,7 +197,8 @@ def _build_app():
 
 
 def main() -> None:
-    _build_app()()
+    app = _build_app()
+    app()
 
 
 if __name__ == "__main__":
