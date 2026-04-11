@@ -78,7 +78,17 @@ class DocumentBuilder:
         return self
 
     def add_typ_template(self, typ_path: Path, data: dict | None = None):
-        """Add a raw Typst .typ template file with optional JSON-serialisable data dict."""
+        """Add a raw Typst .typ template file with optional JSON-serialisable data dict.
+
+        Args:
+            typ_path: Path to the `.typ` Typst template file to render.
+            data: Optional dictionary of template variables. When provided, the
+                  data is encoded and written to ``typy_data.typ`` in the build
+                  directory so the template can import it.
+
+        Returns:
+            self – enables method chaining.
+        """
         typy_module = Path(__file__).parent / "static" / "typy.typ"
 
         if not typ_path.exists():
