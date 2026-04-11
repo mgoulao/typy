@@ -106,7 +106,7 @@ class TypstEncoder:
 
     @classmethod
     def encode_path(cls, data: Path) -> str:
-        return f'"{str(data)}"'
+        return f'"{data.as_posix()}"'
 
     @classmethod
     def encode_pydantic_model(cls, data: BaseModel) -> str:

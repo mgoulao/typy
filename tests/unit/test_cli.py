@@ -55,7 +55,15 @@ def test_format_type_none_annotation():
 
 
 def test_builtin_templates_contains_expected_names():
-    expected = {"report", "invoice", "letter", "cv", "academic", "presentation", "basic"}
+    expected = {
+        "report",
+        "invoice",
+        "letter",
+        "cv",
+        "academic",
+        "presentation",
+        "basic",
+    }
     assert set(BUILTIN_TEMPLATES.keys()) == expected
 
 
@@ -70,7 +78,9 @@ def test_builtin_templates_each_has_template_class():
     from typy.templates import Template
 
     for name, (cls, _) in BUILTIN_TEMPLATES.items():
-        assert issubclass(cls, Template), f"Template '{name}' class is not a Template subclass"
+        assert issubclass(cls, Template), (
+            f"Template '{name}' class is not a Template subclass"
+        )
 
 
 # ---- _resolve_template tests ----

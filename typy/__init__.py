@@ -8,16 +8,16 @@ import typy.markup as markup  # noqa: F401
 import typy.typst_encoder as typst_encoder  # noqa: F401
 
 try:
-	__version__ = version("typy")
+    __version__ = version("typy")
 except PackageNotFoundError:
-	__version__ = "0+unknown"
+    __version__ = "0+unknown"
 
 __all__ = [
-	"__version__",
-	"builder",
-	"content",
-	"encodable",
-	"functions",
-	"markup",
-	"typst_encoder",
+    "__version__",
+    "builder",
+    "content",
+    "encodable",
+    "functions",
+    "markup",
+    "typst_encoder",
 ]

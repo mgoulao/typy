@@ -161,7 +161,9 @@ def cmd_info(name_or_path: str, as_json: bool = False) -> None:
     table.add_column("Required")
     table.add_column("Default")
     for r in rows:
-        req_text = "[green]required[/green]" if r["required"] else "[yellow]optional[/yellow]"
+        req_text = (
+            "[green]required[/green]" if r["required"] else "[yellow]optional[/yellow]"
+        )
         default_text = "" if r["required"] else str(r["default"])
         table.add_row(r["name"], r["type"], req_text, default_text)
     console.print(table)
