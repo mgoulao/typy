@@ -1,29 +1,18 @@
 name: Publish
 on:
-  workflow_run:
-    workflows: ["Release"]
-    types: [completed]
+  push:
+    tags:
+      - "v*"
 
 jobs:
   publish:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
-
-      - name: Resolve release tag
-        id: tag
-        run: |
-          tag=$(git tag --points-at "${{ github.event.workflow_run.head_sha }}" | grep '^v' | sort -V | tail -n 1)
-          if [ -z "$tag" ]; then
-            echo "No v* tag found for commit ${{ github.event.workflow_run.head_sha }}"
-            exit 1
-          fi
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          fetch-depth: 0
 
       - name: Install uv
         uses: astral-sh/setup-uv@cec208311dfd045dd5311c1add060b2062131d57 # v8.0.0
@@ -44,6 +33,6 @@ jobs:
 
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.tag.outputs.tag }}
-          target_commitish: ${{ github.event.workflow_run.head_sha }}
+          tag_name: ${{ github.ref_name }}
+          target_commitish: ${{ github.sha }}
           generate_release_notes: true
