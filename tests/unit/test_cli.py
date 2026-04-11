@@ -1,4 +1,6 @@
 import json
+from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from typer.testing import CliRunner
@@ -8,9 +10,11 @@ from typy.cli import (
     _build_app,
     _format_type,
     _get_field_rows,
+    _load_json_data,
     _resolve_template,
     cmd_info,
     cmd_list,
+    cmd_render,
 )
 from typy.templates import ReportTemplate
 
@@ -294,3 +298,374 @@ def test_main_info_custom_py_file(tmp_path):
     assert result.exit_code == 0
     assert "name" in result.output
     assert "body" in result.output
+
+
+# ---- _load_json_data tests ----
+
+
+def test_load_json_data_valid(tmp_path):
+    data_file = tmp_path / "data.json"
+    data_file.write_text('{"title": "Test", "author": "Alice"}', encoding="utf-8")
+    result = _load_json_data(data_file)
+    assert result == {"title": "Test", "author": "Alice"}
+
+
+def test_load_json_data_missing_file(tmp_path):
+    with pytest.raises(FileNotFoundError, match="Data file not found"):
+        _load_json_data(tmp_path / "nonexistent.json")
+
+
+def test_load_json_data_invalid_json(tmp_path):
+    data_file = tmp_path / "bad.json"
+    data_file.write_text("{not valid json}", encoding="utf-8")
+    with pytest.raises(ValueError, match="Invalid JSON"):
+        _load_json_data(data_file)
+
+
+# ---- cmd_render error tests (no compilation) ----
+
+
+def test_cmd_render_no_template_no_markdown_exits(capsys):
+    with pytest.raises(SystemExit) as exc_info:
+        cmd_render(template=None, data_file=None, markdown_file=None, output=Path("out.pdf"))
+    assert exc_info.value.code == 1
+
+
+def test_cmd_render_no_template_no_markdown_error_message(capsys):
+    with pytest.raises(SystemExit):
+        cmd_render(template=None, data_file=None, markdown_file=None, output=Path("out.pdf"))
+    captured = capsys.readouterr()
+    assert "Error" in captured.err
+
+
+def test_cmd_render_missing_markdown_file_exits(capsys, tmp_path):
+    with pytest.raises(SystemExit) as exc_info:
+        cmd_render(
+            template=None,
+            data_file=None,
+            markdown_file=tmp_path / "missing.md",
+            output=tmp_path / "out.pdf",
+        )
+    assert exc_info.value.code == 1
+
+
+def test_cmd_render_missing_markdown_file_error_message(capsys, tmp_path):
+    with pytest.raises(SystemExit):
+        cmd_render(
+            template=None,
+            data_file=None,
+            markdown_file=tmp_path / "missing.md",
+            output=tmp_path / "out.pdf",
+        )
+    captured = capsys.readouterr()
+    assert "not found" in captured.err
+
+
+def test_cmd_render_template_no_data_no_markdown_exits(capsys):
+    with pytest.raises(SystemExit) as exc_info:
+        cmd_render(
+            template="report",
+            data_file=None,
+            markdown_file=None,
+            output=Path("out.pdf"),
+        )
+    assert exc_info.value.code == 1
+
+
+def test_cmd_render_template_no_data_no_markdown_error_message(capsys):
+    with pytest.raises(SystemExit):
+        cmd_render(
+            template="report",
+            data_file=None,
+            markdown_file=None,
+            output=Path("out.pdf"),
+        )
+    captured = capsys.readouterr()
+    assert "--data" in captured.err or "Error" in captured.err
+
+
+def test_cmd_render_unknown_template_exits(capsys, tmp_path):
+    md = tmp_path / "notes.md"
+    md.write_text("# Hello", encoding="utf-8")
+    with pytest.raises(SystemExit) as exc_info:
+        cmd_render(
+            template="nonexistent_template",
+            data_file=None,
+            markdown_file=md,
+            output=tmp_path / "out.pdf",
+        )
+    assert exc_info.value.code == 1
+
+
+def test_cmd_render_unknown_template_error_message(capsys, tmp_path):
+    md = tmp_path / "notes.md"
+    md.write_text("# Hello", encoding="utf-8")
+    with pytest.raises(SystemExit):
+        cmd_render(
+            template="nonexistent_template",
+            data_file=None,
+            markdown_file=md,
+            output=tmp_path / "out.pdf",
+        )
+    captured = capsys.readouterr()
+    assert "nonexistent_template" in captured.err
+
+
+def test_cmd_render_invalid_json_data_exits(capsys, tmp_path):
+    data_file = tmp_path / "bad.json"
+    data_file.write_text("{bad json}", encoding="utf-8")
+    with pytest.raises(SystemExit) as exc_info:
+        cmd_render(
+            template="report",
+            data_file=data_file,
+            markdown_file=None,
+            output=tmp_path / "out.pdf",
+        )
+    assert exc_info.value.code == 1
+
+
+def test_cmd_render_missing_data_file_exits(capsys, tmp_path):
+    with pytest.raises(SystemExit) as exc_info:
+        cmd_render(
+            template="report",
+            data_file=tmp_path / "missing.json",
+            markdown_file=None,
+            output=tmp_path / "out.pdf",
+        )
+    assert exc_info.value.code == 1
+
+
+def test_cmd_render_validation_error_exits(capsys, tmp_path):
+    """Report template validation fails when required fields are missing."""
+    data_file = tmp_path / "data.json"
+    data_file.write_text('{"title": "Test"}', encoding="utf-8")  # missing required fields
+    with pytest.raises(SystemExit) as exc_info:
+        cmd_render(
+            template="report",
+            data_file=data_file,
+            markdown_file=None,
+            output=tmp_path / "out.pdf",
+        )
+    assert exc_info.value.code == 1
+
+
+# ---- cmd_render success tests (mocked compilation) ----
+
+
+def test_cmd_render_markdown_only_calls_save_pdf(tmp_path):
+    md = tmp_path / "notes.md"
+    md.write_text("# Hello\n\nWorld.", encoding="utf-8")
+    output = tmp_path / "notes.pdf"
+
+    with patch("typy.builder.DocumentBuilder.save_pdf") as mock_save:
+        cmd_render(template=None, data_file=None, markdown_file=md, output=output)
+
+    mock_save.assert_called_once_with(output)
+
+
+def test_cmd_render_markdown_uses_filename_as_title(tmp_path):
+    md = tmp_path / "my_notes.md"
+    md.write_text("# Hello", encoding="utf-8")
+    output = tmp_path / "out.pdf"
+
+    with patch("typy.builder.DocumentBuilder.save_pdf"):
+        with patch("typy.builder.DocumentBuilder.add_template") as mock_add:
+            cmd_render(template=None, data_file=None, markdown_file=md, output=output)
+
+    added_template = mock_add.call_args[0][0]
+    assert added_template.title == "my_notes"
+
+
+def test_cmd_render_builtin_template_with_data(tmp_path):
+    data_file = tmp_path / "data.json"
+    data = {
+        "title": "My Report",
+        "author": "Alice",
+        "date": "2025-01-01",
+        "body": "# Hello",
+        "toc": False,
+    }
+    data_file.write_text(json.dumps(data), encoding="utf-8")
+    output = tmp_path / "out.pdf"
+
+    with patch("typy.builder.DocumentBuilder.save_pdf") as mock_save:
+        cmd_render(template="report", data_file=data_file, markdown_file=None, output=output)
+
+    mock_save.assert_called_once_with(output)
+
+
+def test_cmd_render_markdown_with_builtin_template(tmp_path):
+    md = tmp_path / "analysis.md"
+    md.write_text("# Analysis\n\nContent here.", encoding="utf-8")
+    data_file = tmp_path / "data.json"
+    data = {
+        "title": "Analysis Report",
+        "author": "Bob",
+        "date": "2025-01-01",
+        "toc": False,
+    }
+    data_file.write_text(json.dumps(data), encoding="utf-8")
+    output = tmp_path / "out.pdf"
+
+    with patch("typy.builder.DocumentBuilder.save_pdf") as mock_save:
+        cmd_render(
+            template="report",
+            data_file=data_file,
+            markdown_file=md,
+            output=output,
+        )
+
+    mock_save.assert_called_once_with(output)
+
+
+def test_cmd_render_markdown_body_overrides_data_body(tmp_path):
+    md = tmp_path / "analysis.md"
+    md.write_text("# From Markdown", encoding="utf-8")
+    data_file = tmp_path / "data.json"
+    data = {
+        "title": "Report",
+        "author": "Alice",
+        "date": "2025-01-01",
+        "body": "# From Data",
+        "toc": False,
+    }
+    data_file.write_text(json.dumps(data), encoding="utf-8")
+    output = tmp_path / "out.pdf"
+
+    with patch("typy.builder.DocumentBuilder.save_pdf"):
+        with patch("typy.builder.DocumentBuilder.add_template") as mock_add:
+            cmd_render(
+                template="report",
+                data_file=data_file,
+                markdown_file=md,
+                output=output,
+            )
+
+    added_template = mock_add.call_args[0][0]
+    # body should be the markdown content (not the data.json body)
+    # Content stores items as a list; each item is a Markdown object with a .text attribute
+    body_items = added_template.body.content
+    assert any("From Markdown" in item.text for item in body_items if hasattr(item, "text"))
+
+
+def test_cmd_render_custom_typ_file(tmp_path):
+    typ_file = tmp_path / "custom.typ"
+    typ_file.write_text("#let x = 1", encoding="utf-8")
+    data_file = tmp_path / "data.json"
+    data_file.write_text('{"name": "Alice"}', encoding="utf-8")
+    output = tmp_path / "out.pdf"
+
+    with patch("typy.builder.DocumentBuilder.save_pdf") as mock_save:
+        with patch("typy.builder.DocumentBuilder.add_typ_template") as mock_add_typ:
+            cmd_render(
+                template=str(typ_file),
+                data_file=data_file,
+                markdown_file=None,
+                output=output,
+            )
+
+    mock_add_typ.assert_called_once()
+    mock_save.assert_called_once_with(output)
+
+
+def test_cmd_render_creates_output_parent_dirs(tmp_path):
+    md = tmp_path / "notes.md"
+    md.write_text("# Hello", encoding="utf-8")
+    output = tmp_path / "subdir" / "nested" / "out.pdf"
+
+    with patch("typy.builder.DocumentBuilder.save_pdf"):
+        cmd_render(template=None, data_file=None, markdown_file=md, output=output)
+
+    assert output.parent.exists()
+
+
+# ---- render CLI command tests ----
+
+
+def test_main_render_no_args_shows_error():
+    app = _build_app()
+    result = runner.invoke(app, ["render"])
+    assert result.exit_code == 1
+
+
+def test_main_render_help():
+    app = _build_app()
+    result = runner.invoke(app, ["render", "--help"])
+    assert result.exit_code == 0
+    # Strip ANSI escape codes before checking option names
+    import re
+    plain = re.sub(r"\x1b\[[0-9;]*m", "", result.output)
+    assert "--template" in plain
+    assert "--data" in plain
+    assert "--markdown" in plain
+    assert "--output" in plain
+
+
+def test_main_render_markdown_only(tmp_path):
+    md = tmp_path / "notes.md"
+    md.write_text("# Hello\n\nWorld.", encoding="utf-8")
+    output = tmp_path / "notes.pdf"
+
+    app = _build_app()
+    with patch("typy.builder.DocumentBuilder.save_pdf"):
+        result = runner.invoke(
+            app, ["render", "--markdown", str(md), "--output", str(output)]
+        )
+
+    assert result.exit_code == 0
+
+
+def test_main_render_template_with_data(tmp_path):
+    data_file = tmp_path / "data.json"
+    data = {
+        "title": "My Report",
+        "author": "Alice",
+        "date": "2025-01-01",
+        "body": "# Hello",
+        "toc": False,
+    }
+    data_file.write_text(json.dumps(data), encoding="utf-8")
+    output = tmp_path / "out.pdf"
+
+    app = _build_app()
+    with patch("typy.builder.DocumentBuilder.save_pdf"):
+        result = runner.invoke(
+            app,
+            ["render", "--template", "report", "--data", str(data_file), "--output", str(output)],
+        )
+
+    assert result.exit_code == 0
+
+
+def test_main_render_default_output(tmp_path):
+    """--output defaults to output.pdf in the current directory."""
+    md = tmp_path / "notes.md"
+    md.write_text("# Hello", encoding="utf-8")
+
+    app = _build_app()
+    with patch("typy.builder.DocumentBuilder.save_pdf") as mock_save:
+        result = runner.invoke(app, ["render", "--markdown", str(md)])
+
+    assert result.exit_code == 0
+    # Default output should be output.pdf
+    called_path = mock_save.call_args[0][0]
+    assert called_path.name == "output.pdf"
+
+
+def test_main_render_missing_markdown_exits(tmp_path):
+    app = _build_app()
+    result = runner.invoke(
+        app, ["render", "--markdown", str(tmp_path / "missing.md")]
+    )
+    assert result.exit_code == 1
+
+
+def test_main_render_unknown_template_exits(tmp_path):
+    md = tmp_path / "notes.md"
+    md.write_text("# Hi", encoding="utf-8")
+    app = _build_app()
+    result = runner.invoke(
+        app,
+        ["render", "--markdown", str(md), "--template", "nonexistent"],
+    )
+    assert result.exit_code == 1

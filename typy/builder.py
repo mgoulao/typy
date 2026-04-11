@@ -77,6 +77,21 @@ class DocumentBuilder:
 
         return self
 
+    def add_typ_template(self, typ_path: Path, data: dict | None = None):
+        """Add a raw Typst .typ template file with optional JSON-serialisable data dict."""
+        typy_module = Path(__file__).parent / "static" / "typy.typ"
+
+        if not typ_path.exists():
+            raise FileNotFoundError(f"Template file not found: {typ_path}")
+
+        shutil.copy(typ_path, Path(self.tmp_dir.name) / "main.typ")
+        shutil.copy(typy_module, Path(self.tmp_dir.name) / "typy.typ")
+
+        if data is not None:
+            self.add_data(data)
+
+        return self
+
     def add_file(self, filepath: Path) -> Path:
         return Path(shutil.copy(filepath, Path(self.tmp_dir.name))).relative_to(
             Path(self.tmp_dir.name)
