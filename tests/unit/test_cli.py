@@ -457,13 +457,17 @@ def test_load_json_data_invalid_json(tmp_path):
 
 def test_cmd_render_no_template_no_markdown_exits(capsys):
     with pytest.raises(SystemExit) as exc_info:
-        cmd_render(template=None, data_file=None, markdown_file=None, output=Path("out.pdf"))
+        cmd_render(
+            template=None, data_file=None, markdown_file=None, output=Path("out.pdf")
+        )
     assert exc_info.value.code == 1
 
 
 def test_cmd_render_no_template_no_markdown_error_message(capsys):
     with pytest.raises(SystemExit):
-        cmd_render(template=None, data_file=None, markdown_file=None, output=Path("out.pdf"))
+        cmd_render(
+            template=None, data_file=None, markdown_file=None, output=Path("out.pdf")
+        )
     captured = capsys.readouterr()
     assert "Error" in captured.err
 
@@ -570,7 +574,9 @@ def test_cmd_render_missing_data_file_exits(capsys, tmp_path):
 def test_cmd_render_validation_error_exits(capsys, tmp_path):
     """Report template validation fails when required fields are missing."""
     data_file = tmp_path / "data.json"
-    data_file.write_text('{"title": "Test"}', encoding="utf-8")  # missing required fields
+    data_file.write_text(
+        '{"title": "Test"}', encoding="utf-8"
+    )  # missing required fields
     with pytest.raises(SystemExit) as exc_info:
         cmd_render(
             template="report",
@@ -618,7 +624,12 @@ def test_cmd_render_markdown_copies_assets(tmp_path):
 
     with patch("typy.builder.DocumentBuilder.save_pdf"):
         with patch("typy.builder.DocumentBuilder.copy_assets_from") as mock_copy:
-            cmd_render(template=None, data_file=None, markdown_file=md, output=tmp_path / "out.pdf")
+            cmd_render(
+                template=None,
+                data_file=None,
+                markdown_file=md,
+                output=tmp_path / "out.pdf",
+            )
 
     mock_copy.assert_called_once_with(tmp_path.resolve())
 
@@ -649,7 +660,9 @@ def test_cmd_render_builtin_template_with_data(tmp_path):
     output = tmp_path / "out.pdf"
 
     with patch("typy.builder.DocumentBuilder.save_pdf") as mock_save:
-        cmd_render(template="report", data_file=data_file, markdown_file=None, output=output)
+        cmd_render(
+            template="report", data_file=data_file, markdown_file=None, output=output
+        )
 
     mock_save.assert_called_once_with(output)
 
@@ -705,7 +718,9 @@ def test_cmd_render_markdown_body_overrides_data_body(tmp_path):
     # body should be the markdown content (not the data.json body)
     # Content stores items as a list; each item is a Markdown object with a .text attribute
     body_items = added_template.body.content
-    assert any("From Markdown" in item.text for item in body_items if hasattr(item, "text"))
+    assert any(
+        "From Markdown" in item.text for item in body_items if hasattr(item, "text")
+    )
 
 
 def test_cmd_render_custom_typ_file(tmp_path):
@@ -754,6 +769,7 @@ def test_main_render_help():
     assert result.exit_code == 0
     # Strip ANSI escape codes before checking option names
     import re
+
     plain = re.sub(r"\x1b\[[0-9;]*m", "", result.output)
     assert "--template" in plain
     assert "--data" in plain
@@ -791,7 +807,15 @@ def test_main_render_template_with_data(tmp_path):
     with patch("typy.builder.DocumentBuilder.save_pdf"):
         result = runner.invoke(
             app,
-            ["render", "--template", "report", "--data", str(data_file), "--output", str(output)],
+            [
+                "render",
+                "--template",
+                "report",
+                "--data",
+                str(data_file),
+                "--output",
+                str(output),
+            ],
         )
 
     assert result.exit_code == 0
@@ -814,9 +838,7 @@ def test_main_render_default_output(tmp_path):
 
 def test_main_render_missing_markdown_exits(tmp_path):
     app = _build_app()
-    result = runner.invoke(
-        app, ["render", "--markdown", str(tmp_path / "missing.md")]
-    )
+    result = runner.invoke(app, ["render", "--markdown", str(tmp_path / "missing.md")])
     assert result.exit_code == 1
 
 

@@ -206,9 +206,7 @@ def cmd_render(
 
         output.parent.mkdir(parents=True, exist_ok=True)
         builder.save_pdf(output)
-        console.print(
-            f"[green]✓[/green] PDF saved to [cyan]{output.resolve()}[/cyan]"
-        )
+        console.print(f"[green]✓[/green] PDF saved to [cyan]{output.resolve()}[/cyan]")
 
     except FileNotFoundError as e:
         console.print(f"[red]Error:[/red] {e}")
@@ -219,7 +217,6 @@ def cmd_render(
     except Exception as e:
         console.print(f"[red]Error:[/red] Rendering failed: {e}")
         sys.exit(1)
-
 
 
 def _generate_sample_data(template_cls: type[Template]) -> dict:
