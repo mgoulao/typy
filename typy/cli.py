@@ -166,13 +166,6 @@ def cmd_render(
             data: dict = {}
             if data_file is not None:
                 data = _load_json_data(data_file)
-            elif markdown_content is None:
-                # Neither --data nor --markdown given with --template
-                console.print(
-                    "[red]Error:[/red] --data is required when using --template "
-                    "without --markdown."
-                )
-                sys.exit(1)
 
             # Inject markdown into the body field when --markdown is provided
             if markdown_content is not None:
@@ -181,6 +174,15 @@ def cmd_render(
             template_cls = _resolve_template(template)
             if template_cls is not None:
                 # Built-in or .py custom template — validate via Pydantic
+                if not data and markdown_content is None:
+                    # No data and no markdown: generate sample data automatically
+                    data = _generate_sample_data(template_cls)
+                    console.print(
+                        f"[yellow]Note:[/yellow] No --data provided. "
+                        "Rendering with sample data. "
+                        f"Run 'typy scaffold {template}' to generate a data.json "
+                        "you can edit."
+                    )
                 try:
                     tmpl = template_cls(**data)
                 except Exception as e:
@@ -212,6 +214,103 @@ def cmd_render(
         console.print(f"[red]Error:[/red] Rendering failed: {e}")
         sys.exit(1)
 
+
+
+def _generate_sample_data(template_cls: type[Template]) -> dict:
+    """Generate a sample data dictionary for a template with placeholder values.
+
+    All required fields are filled with sensible placeholders; optional fields
+    use their Pydantic-defined defaults.
+    """
+    from datetime import date as _date
+
+    import pydantic
+
+    from typy.content import Content
+
+    today = _date.today().strftime("%Y-%m-%d")
+
+    def _for_annotation(ann: object, name: str) -> object:
+        if ann is None:
+            return ""
+
+        origin = get_origin(ann)
+        args = get_args(ann)
+
+        # Union / Optional → unwrap to the first non-None type
+        if origin is typing.Union or isinstance(ann, types.UnionType):
+            non_none = [a for a in args if a is not types.NoneType]
+            if not non_none:
+                return None
+            return _for_annotation(non_none[0], name)
+
+        # list[T] → one sample item
+        if origin is list:
+            return [_for_annotation(args[0], name)] if args else []
+
+        # Class-based types
+        if isinstance(ann, type):
+            try:
+                if issubclass(ann, Content):
+                    return "# Section\n\nWrite your content here."
+                if issubclass(ann, pydantic.BaseModel):
+                    return _for_model(ann)
+            except TypeError:
+                pass
+
+        # Primitives
+        if ann is str:
+            return today if "date" in name else name.replace("_", " ").title()
+        if ann is int:
+            return 1
+        if ann is float:
+            return 1.0
+        if ann is bool:
+            return True
+        if ann is Path:
+            return None
+
+        return ""
+
+    def _for_model(cls: type[pydantic.BaseModel]) -> dict:
+        result = {}
+        for field_name, fi in cls.model_fields.items():
+            if fi.is_required():
+                result[field_name] = _for_annotation(fi.annotation, field_name)
+            else:
+                result[field_name] = fi.default
+        return result
+
+    return _for_model(template_cls)
+
+
+def cmd_scaffold(template_name: str, output_file: Path | None) -> None:
+    """Generate a sample JSON data file for a template."""
+    from rich.console import Console
+
+    console = Console(stderr=True)
+
+    template_cls = _resolve_template(template_name)
+    if template_cls is None:
+        console.print(
+            f"[red]Error:[/red] Template '{template_name}' not found. "
+            "Use 'typy list' to see available templates."
+        )
+        sys.exit(1)
+
+    data = _generate_sample_data(template_cls)
+    json_str = json.dumps(data, indent=2, default=str)
+
+    if output_file is None:
+        print(json_str)
+    else:
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+        output_file.write_text(json_str, encoding="utf-8")
+        Console().print(
+            f"Sample data written to [cyan]{output_file}[/cyan]. "
+            "Edit it and run:\n"
+            f"  typy render --template {template_name} --data {output_file}"
+        )
 
 
 def cmd_list() -> None:
@@ -303,6 +402,20 @@ def _build_app():
     ):
         """Show schema for a template."""
         cmd_info(template, as_json=json)
+
+    @app.command("scaffold")
+    def scaffold_cmd(
+        template: str = typer.Argument(
+            ..., help="Template name (e.g. 'report') or path to a Python file."
+        ),
+        output: typing.Optional[Path] = typer.Option(
+            None,
+            "--output",
+            help="Write sample JSON to this file. Defaults to stdout.",
+        ),
+    ):
+        """Generate a sample data.json for a template."""
+        cmd_scaffold(template, output)
 
     @app.command("render")
     def render_cmd(

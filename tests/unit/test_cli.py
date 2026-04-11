@@ -9,12 +9,14 @@ from typy.cli import (
     BUILTIN_TEMPLATES,
     _build_app,
     _format_type,
+    _generate_sample_data,
     _get_field_rows,
     _load_json_data,
     _resolve_template,
     cmd_info,
     cmd_list,
     cmd_render,
+    cmd_scaffold,
 )
 from typy.templates import ReportTemplate
 
@@ -300,6 +302,134 @@ def test_main_info_custom_py_file(tmp_path):
     assert "body" in result.output
 
 
+# ---- _generate_sample_data tests ----
+
+
+def test_generate_sample_data_report_has_all_fields():
+    data = _generate_sample_data(ReportTemplate)
+    assert "title" in data
+    assert "author" in data
+    assert "date" in data
+    assert "body" in data
+    assert "toc" in data
+
+
+def test_generate_sample_data_report_required_str_fields_are_strings():
+    data = _generate_sample_data(ReportTemplate)
+    assert isinstance(data["title"], str) and data["title"]
+    assert isinstance(data["author"], str) and data["author"]
+
+
+def test_generate_sample_data_report_body_is_markdown_string():
+    data = _generate_sample_data(ReportTemplate)
+    assert isinstance(data["body"], str)
+    assert "#" in data["body"]
+
+
+def test_generate_sample_data_report_toc_uses_default():
+    data = _generate_sample_data(ReportTemplate)
+    assert data["toc"] is True  # Pydantic default
+
+
+def test_generate_sample_data_report_optional_uses_default():
+    data = _generate_sample_data(ReportTemplate)
+    assert data["subtitle"] is None  # Pydantic default
+
+
+def test_generate_sample_data_all_builtin_templates():
+    for name, (cls, _) in BUILTIN_TEMPLATES.items():
+        data = _generate_sample_data(cls)
+        assert isinstance(data, dict), f"Sample data for '{name}' is not a dict"
+        assert data, f"Sample data for '{name}' is empty"
+
+
+def test_generate_sample_data_is_json_serializable():
+    """All generated sample data must be JSON-serializable."""
+    for _name, (cls, _) in BUILTIN_TEMPLATES.items():
+        data = _generate_sample_data(cls)
+        # Should not raise
+        json.dumps(data, default=str)
+
+
+def test_generate_sample_data_invoice_has_items_list():
+    from typy.templates import InvoiceTemplate
+
+    data = _generate_sample_data(InvoiceTemplate)
+    assert isinstance(data["items"], list)
+    assert len(data["items"]) == 1
+    assert "description" in data["items"][0]
+
+
+def test_generate_sample_data_cv_has_nested_contact():
+    from typy.templates import CVTemplate
+
+    data = _generate_sample_data(CVTemplate)
+    assert isinstance(data["contact"], dict)
+    assert "email" in data["contact"]
+
+
+# ---- cmd_scaffold tests ----
+
+
+def test_cmd_scaffold_prints_json_to_stdout(capsys):
+    cmd_scaffold("report", output_file=None)
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert "title" in data
+    assert "body" in data
+
+
+def test_cmd_scaffold_writes_to_file(tmp_path):
+    output = tmp_path / "data.json"
+    cmd_scaffold("report", output_file=output)
+    assert output.exists()
+    data = json.loads(output.read_text(encoding="utf-8"))
+    assert "title" in data
+
+
+def test_cmd_scaffold_creates_output_parent_dirs(tmp_path):
+    output = tmp_path / "subdir" / "data.json"
+    cmd_scaffold("report", output_file=output)
+    assert output.exists()
+
+
+def test_cmd_scaffold_unknown_template_exits(capsys):
+    with pytest.raises(SystemExit) as exc_info:
+        cmd_scaffold("nonexistent", output_file=None)
+    assert exc_info.value.code == 1
+
+
+def test_cmd_scaffold_unknown_template_error_message(capsys):
+    with pytest.raises(SystemExit):
+        cmd_scaffold("nonexistent", output_file=None)
+    captured = capsys.readouterr()
+    assert "nonexistent" in captured.err
+
+
+def test_main_scaffold_report_to_stdout(capsys):
+    app = _build_app()
+    result = runner.invoke(app, ["scaffold", "report"])
+    assert result.exit_code == 0
+    data = json.loads(result.output)
+    assert "title" in data
+
+
+def test_main_scaffold_report_to_file(tmp_path):
+    output = tmp_path / "data.json"
+    app = _build_app()
+    result = runner.invoke(app, ["scaffold", "report", "--output", str(output)])
+    assert result.exit_code == 0
+    assert output.exists()
+    data = json.loads(output.read_text(encoding="utf-8"))
+    assert "title" in data
+
+
+def test_main_scaffold_unknown_template_exits():
+    app = _build_app()
+    result = runner.invoke(app, ["scaffold", "nonexistent"])
+    assert result.exit_code == 1
+
+
 # ---- _load_json_data tests ----
 
 
@@ -361,27 +491,29 @@ def test_cmd_render_missing_markdown_file_error_message(capsys, tmp_path):
     assert "not found" in captured.err
 
 
-def test_cmd_render_template_no_data_no_markdown_exits(capsys):
-    with pytest.raises(SystemExit) as exc_info:
+def test_cmd_render_template_no_data_no_markdown_uses_sample_data(capsys, tmp_path):
+    """When --template is given without --data or --markdown, sample data is auto-generated."""
+    with patch("typy.builder.DocumentBuilder.save_pdf"):
         cmd_render(
             template="report",
             data_file=None,
             markdown_file=None,
-            output=Path("out.pdf"),
-        )
-    assert exc_info.value.code == 1
-
-
-def test_cmd_render_template_no_data_no_markdown_error_message(capsys):
-    with pytest.raises(SystemExit):
-        cmd_render(
-            template="report",
-            data_file=None,
-            markdown_file=None,
-            output=Path("out.pdf"),
+            output=tmp_path / "out.pdf",
         )
     captured = capsys.readouterr()
-    assert "--data" in captured.err or "Error" in captured.err
+    assert "sample data" in captured.err.lower()
+
+
+def test_cmd_render_template_no_data_no_markdown_renders(capsys, tmp_path):
+    """No --data with --template renders successfully using auto-generated data."""
+    with patch("typy.builder.DocumentBuilder.save_pdf") as mock_save:
+        cmd_render(
+            template="report",
+            data_file=None,
+            markdown_file=None,
+            output=tmp_path / "out.pdf",
+        )
+    mock_save.assert_called_once_with(tmp_path / "out.pdf")
 
 
 def test_cmd_render_unknown_template_exits(capsys, tmp_path):
