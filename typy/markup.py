@@ -34,4 +34,8 @@ class Heading(Markup):
 class Markdown(Markup):
     def encode(self):
         text = self.text.replace("\\", "\\\\").replace('"', '\\"')
-        return f'[#{{ import "@preview/cmarker:0.1.8": render; render("{text}") }}]'
+        return (
+            f'#{{ import "@preview/cmarker:0.1.8": render; render("{text}",'
+            " scope: (image: (source, alt: none, format: auto) =>"
+            " image(source, alt: alt, format: format))) }"
+        )

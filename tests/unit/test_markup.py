@@ -29,9 +29,11 @@ def test_heading_encode_special_characters():
 def test_markdown_encode_simple():
     md = Markdown("## Hello")
     encoded = md.encode()
-    assert 'render("## Hello")' in encoded
-    assert encoded.startswith("[#")
-    assert encoded.endswith("]")
+    assert 'render("## Hello",' in encoded
+    assert encoded.startswith(
+        "#{"
+    )  # no outer content brackets; Content.encode() provides them
+    assert not encoded.startswith("[#")
 
 
 def test_markdown_encode_multiline():
@@ -56,5 +58,5 @@ def test_markdown_encode_escapes_quotes():
 def test_markdown_encode_empty():
     md = Markdown("")
     encoded = md.encode()
-    assert 'render("")' in encoded
-    assert encoded.startswith("[#")
+    assert 'render("",' in encoded
+    assert encoded.startswith("#{")

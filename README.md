@@ -140,10 +140,10 @@ body = Markdown("""
 
 The analysis shows a **significant improvement** in performance.
 
-| Metric | Before | After |
-|--------|--------|-------|
-| Latency | 120ms | 45ms |
-| Throughput | 1000 | 3200 |
+| Metric     | Before | After |
+| ---------- | ------ | ----- |
+| Latency    | 120ms  | 45ms  |
+| Throughput | 1000   | 3200  |
 """)
 
 builder = DocumentBuilder()
@@ -186,12 +186,12 @@ template = BasicTemplate(
 
 **Rules:**
 
-| Field type | Input | Result |
-|------------|-------|--------|
-| `Content`  | `str` | auto-converted to `Markdown(str)` and rendered via cmarker |
-| `Content`  | `Content(...)` | passed through unchanged |
-| `Content`  | `Markdown(...)` | passed through as a `Content` wrapping the `Markdown` |
-| `str`      | `str` | stays a plain string — never converted |
+| Field type | Input           | Result                                                     |
+| ---------- | --------------- | ---------------------------------------------------------- |
+| `Content`  | `str`           | auto-converted to `Markdown(str)` and rendered via cmarker |
+| `Content`  | `Content(...)`  | passed through unchanged                                   |
+| `Content`  | `Markdown(...)` | passed through as a `Content` wrapping the `Markdown`      |
+| `str`      | `str`           | stays a plain string — never converted                     |
 
 An explicit `Markdown(...)` wrapper always works as an override and is passed through unchanged:
 
@@ -207,9 +207,100 @@ template = BasicTemplate(
 )
 ```
 
+## CLI
 
+typy ships a command-line interface for common document tasks without writing any Python.
 
+```
+typy [command] [options]
+```
 
+### `typy list`
 
+List all available built-in templates.
+
+```bash
+typy list
+```
+
+**Output:**
+
+| Name           | Description                                  |
+| -------------- | -------------------------------------------- |
+| `report`       | General-purpose report with TOC and sections |
+| `invoice`      | Business invoice with line items             |
+| `letter`       | Formal business letter                       |
+| `cv`           | CV / resume                                  |
+| `academic`     | Academic paper with citations                |
+| `presentation` | Slide deck (16:9)                            |
+| `basic`        | Basic single-section document                |
+
+---
+
+### `typy info <template>`
+
+Print the field schema for a template.
+
+```bash
+typy info report
+typy info report --json          # output as JSON
+typy info ./my_template.py       # custom template from a .py file
+```
+
+| Option   | Description                             |
+| -------- | --------------------------------------- |
+| `--json` | Print schema as JSON instead of a table |
+
+---
+
+### `typy scaffold <template>`
+
+Generate a sample `data.json` pre-filled with placeholder values for every field.
+
+```bash
+typy scaffold report                        # print to stdout
+typy scaffold report --output data.json     # write to a file
+typy scaffold ./my_template.py --output data.json
+```
+
+| Option            | Description                               |
+| ----------------- | ----------------------------------------- |
+| `--output <file>` | Write JSON to this file instead of stdout |
+
+**Typical workflow:**
+
+```bash
+typy scaffold report --output data.json
+# edit data.json …
+typy render --template report --data data.json
+```
+
+---
+
+### `typy render`
+
+Render a PDF from a template and/or a Markdown file.
+
+```bash
+typy render --template report --data data.json
+typy render --template report --data data.json --output report.pdf
+typy render --markdown README.md                         # Markdown-only, no template required
+typy render --template report --markdown body.md         # injects markdown into the body field
+typy render --template report                            # renders with auto-generated sample data
+typy render --template ./custom.typ --data data.json     # raw .typ file
+```
+
+| Option                    | Default      | Description                                                                                                                                                                          |
+| ------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `--template <name\|path>` | —            | Built-in template name (e.g. `report`), path to a `.py` file with a `Template` subclass, or path to a raw `.typ` file                                                                |
+| `--data <file>`           | —            | Path to a JSON file with template field values                                                                                                                                       |
+| `--markdown <file>`       | —            | Path to a Markdown file. When used without `--template`, renders standalone via `BasicTemplate`. When combined with `--template`, the file content is injected into the `body` field |
+| `--output <file>`         | `output.pdf` | Destination PDF path                                                                                                                                                                 |
+
+At least one of `--template` or `--markdown` must be provided.
+
+When `--data` is omitted and no `--markdown` is given, sample data is auto-generated — useful for a quick preview. Run `typy scaffold` to get an editable JSON file.
+
+---
 
 The current code to encode the data into Typst markup is still very basic and only supports a few types, functions, and markup elements. **Most importantly, it is very buggy.**

@@ -77,6 +77,70 @@ class DocumentBuilder:
 
         return self
 
+    def add_typ_template(self, typ_path: Path, data: dict | None = None):
+        """Add a raw Typst .typ template file with optional JSON-serialisable data dict.
+
+        Args:
+            typ_path: Path to the `.typ` Typst template file to render.
+            data: Optional dictionary of template variables. When provided, the
+                  data is encoded and written to ``typy_data.typ`` in the build
+                  directory so the template can import it.
+
+        Returns:
+            self – enables method chaining.
+        """
+        typy_module = Path(__file__).parent / "static" / "typy.typ"
+
+        if not typ_path.exists():
+            raise FileNotFoundError(f"Template file not found: {typ_path}")
+
+        shutil.copy(typ_path, Path(self.tmp_dir.name) / "main.typ")
+        shutil.copy(typy_module, Path(self.tmp_dir.name) / "typy.typ")
+
+        if data is not None:
+            self.add_data(data)
+
+        return self
+
+    def copy_assets_from(self, source_dir: Path) -> "DocumentBuilder":
+        """Copy files from source_dir into the build temp dir.
+
+        This makes relative paths (e.g. ``assets/image.png``) in the document
+        resolvable during Typst compilation, which otherwise runs in an isolated
+        temporary directory.
+
+        Files named ``main.typ``, ``typy_data.typ``, and ``typy.typ`` are
+        intentionally excluded so the generated build files are not overwritten.
+
+        Args:
+            source_dir: Directory whose contents are copied to the build dir.
+
+        Returns:
+            self – enables method chaining.
+        """
+        ignore = shutil.ignore_patterns(
+            ".git",
+            "node_modules",
+            "__pycache__",
+            ".venv",
+            "venv",
+            "*.pyc",
+            "*.pyo",
+            "main.typ",
+            "typy_data.typ",
+            "typy.typ",
+        )
+        try:
+            shutil.copytree(
+                source_dir,
+                Path(self.tmp_dir.name),
+                dirs_exist_ok=True,
+                ignore=ignore,
+            )
+        except (shutil.Error, OSError):
+            pass  # Best-effort: don't fail if some assets can't be copied
+        return self
+
     def add_file(self, filepath: Path) -> Path:
         return Path(shutil.copy(filepath, Path(self.tmp_dir.name))).relative_to(
             Path(self.tmp_dir.name)
