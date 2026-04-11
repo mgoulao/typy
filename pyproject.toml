@@ -8,7 +8,12 @@ authors = [{ name = "Manuel Goulão", email = "msilvagoulao@gmail.com" }]
 dependencies = [
 	"typst==0.13.7",
 	"pydantic>=2.11.3,<3.0.0",
+	"typer>=0.12.0,<1.0.0",
+	"rich>=13.0.0,<15.0.0",
 ]
+
+[project.scripts]
+typy = "typy.cli:main"
 
 [project.optional-dependencies]
 pandas = ["pandas>=2.0,<3.0"]
