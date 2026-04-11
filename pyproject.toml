@@ -10,6 +10,9 @@ dependencies = [
 	"pydantic>=2.11.3,<3.0.0",
 ]
 
+[project.scripts]
+typy = "typy.cli:main"
+
 [project.optional-dependencies]
 pandas = ["pandas>=2.0,<3.0"]
 
