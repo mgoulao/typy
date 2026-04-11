@@ -268,17 +268,21 @@ def _generate_sample_data(template_cls: type[Template]) -> dict:
         if ann is bool:
             return True
         if ann is Path:
-            return None
+            return "path/to/file"
 
         return ""
 
     def _for_model(cls: type[pydantic.BaseModel]) -> dict:
+        from pydantic_core import PydanticUndefined
+
         result = {}
         for field_name, fi in cls.model_fields.items():
             if fi.is_required():
                 result[field_name] = _for_annotation(fi.annotation, field_name)
-            else:
+            elif fi.default is not PydanticUndefined:
                 result[field_name] = fi.default
+            else:
+                result[field_name] = _for_annotation(fi.annotation, field_name)
         return result
 
     return _for_model(template_cls)
