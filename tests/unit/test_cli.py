@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 from unittest.mock import patch
 
@@ -21,6 +22,12 @@ from typy.cli import (
 from typy.templates import ReportTemplate
 
 runner = CliRunner()
+
+
+def _plain_help(text: str) -> str:
+    """Strip ANSI escape sequences to make help assertions stable."""
+    return re.sub(r"\x1b\[[0-9;]*m", "", text)
+
 
 # ---- _format_type tests ----
 
@@ -279,6 +286,26 @@ def test_main_no_command_shows_help():
     app = _build_app()
     result = runner.invoke(app, [])
     assert "typy" in result.output
+
+
+def test_main_help_includes_quick_guide_steps():
+    app = _build_app()
+    result = runner.invoke(app, ["--help"])
+    assert result.exit_code == 0
+    plain = _plain_help(result.output)
+    assert "Quick guide" in plain
+    assert "typy info report --json" in plain
+    assert "typy render --template report --data data.json" in plain
+
+
+def test_main_help_mentions_agent_friendly_json_schema_output():
+    app = _build_app()
+    result = runner.invoke(app, ["--help"])
+    assert result.exit_code == 0
+    plain = _plain_help(result.output)
+    assert "scripts" in plain
+    assert "AI" in plain
+    assert "agents" in plain
 
 
 def test_main_info_custom_py_file(tmp_path):
@@ -612,7 +639,7 @@ def test_cmd_render_prints_success_message(capsys, tmp_path):
 
     captured = capsys.readouterr()
     assert "PDF saved" in captured.err
-    assert str(output.resolve()) in captured.err
+    assert output.name in captured.err
 
 
 def test_cmd_render_markdown_copies_assets(tmp_path):
@@ -767,14 +794,13 @@ def test_main_render_help():
     app = _build_app()
     result = runner.invoke(app, ["render", "--help"])
     assert result.exit_code == 0
-    # Strip ANSI escape codes before checking option names
-    import re
-
-    plain = re.sub(r"\x1b\[[0-9;]*m", "", result.output)
+    plain = _plain_help(result.output)
     assert "--template" in plain
     assert "--data" in plain
     assert "--markdown" in plain
     assert "--output" in plain
+    assert "template module" in plain
+    assert ".typ file" in plain
 
 
 def test_main_render_markdown_only(tmp_path):

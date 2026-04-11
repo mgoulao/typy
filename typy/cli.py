@@ -29,6 +29,26 @@ BUILTIN_TEMPLATES: dict[str, tuple[type[Template], str]] = {
     "basic": (BasicTemplate, "Basic single-section document"),
 }
 
+CLI_HELP = """Generate PDF documents from Typst templates and Markdown.
+
+Quick guide:
+    1) Discover templates: typy list
+    2) Inspect required fields: typy info report --json
+    3) Create starter data: typy scaffold report --output data.json
+    4) Render PDF: typy render --template report --data data.json --output report.pdf
+
+Tip: prefer 'typy info <template> --json' when automating with scripts or AI agents.
+"""
+
+CLI_EPILOG = """Examples:
+    typy list
+    typy info report
+    typy info report --json
+    typy scaffold report --output data.json
+    typy render --template report --data data.json --output report.pdf
+    typy render --markdown notes.md --output notes.pdf
+"""
+
 
 def _format_type(annotation: object) -> str:
     """Return a concise human-readable string for a type annotation."""
@@ -390,38 +410,57 @@ def _build_app():
 
     app = typer.Typer(
         name="typy",
-        help="typy — generate PDF documents from Typst templates",
+        help=CLI_HELP,
+        epilog=CLI_EPILOG,
+        rich_markup_mode="rich",
         no_args_is_help=True,
         add_completion=False,
     )
 
     @app.command("list")
     def list_cmd():
-        """List all available built-in templates."""
+        """List built-in templates and their intended use."""
         cmd_list()
 
     @app.command("info")
     def info_cmd(
         template: str = typer.Argument(
-            ..., help="Template name (e.g. 'report') or path to a Python file"
+            ...,
+            help=(
+                "Template name (e.g. 'report') or path to a Python file "
+                "containing a Template subclass."
+            ),
         ),
-        json: bool = typer.Option(False, "--json", help="Output schema as JSON"),
+        json: bool = typer.Option(
+            False,
+            "--json",
+            help=(
+                "Output machine-readable schema JSON. "
+                "Recommended for scripts and AI agents."
+            ),
+        ),
     ):
-        """Show schema for a template."""
+        """Show field schema for a template."""
         cmd_info(template, as_json=json)
 
     @app.command("scaffold")
     def scaffold_cmd(
         template: str = typer.Argument(
-            ..., help="Template name (e.g. 'report') or path to a Python file."
+            ...,
+            help=(
+                "Template name (e.g. 'report') or path to a Python file "
+                "containing a Template subclass."
+            ),
         ),
         output: typing.Optional[Path] = typer.Option(
             None,
             "--output",
-            help="Write sample JSON to this file. Defaults to stdout.",
+            help=(
+                "Write sample JSON to this file. If omitted, JSON is printed to stdout."
+            ),
         ),
     ):
-        """Generate a sample data.json for a template."""
+        """Generate starter JSON data for a template."""
         cmd_scaffold(template, output)
 
     @app.command("render")
@@ -429,12 +468,15 @@ def _build_app():
         template: typing.Optional[str] = typer.Option(
             None,
             "--template",
-            help="Built-in template name (e.g. 'report') or path to a .typ file.",
+            help=(
+                "Built-in template name (e.g. 'report'), path to a .py template "
+                "module, or path to a raw .typ file."
+            ),
         ),
         data: typing.Optional[Path] = typer.Option(
             None,
             "--data",
-            help="Path to a JSON file with template data.",
+            help="Path to JSON file with template fields.",
             exists=False,
             file_okay=True,
             dir_okay=False,
@@ -442,7 +484,10 @@ def _build_app():
         markdown: typing.Optional[Path] = typer.Option(
             None,
             "--markdown",
-            help="Path to a Markdown file to render.",
+            help=(
+                "Path to Markdown file. Without --template, renders as a basic "
+                "document. With --template, content is injected into body."
+            ),
             exists=False,
             file_okay=True,
             dir_okay=False,
@@ -450,10 +495,10 @@ def _build_app():
         output: Path = typer.Option(
             Path("output.pdf"),
             "--output",
-            help="Output PDF path (default: output.pdf).",
+            help="Output PDF path.",
         ),
     ):
-        """Render a document to PDF from a template and/or Markdown file."""
+        """Render PDF from template data, Markdown, or both."""
         cmd_render(
             template=template,
             data_file=data,
