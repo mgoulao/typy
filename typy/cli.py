@@ -41,7 +41,7 @@ def _format_type(annotation: object) -> str:
 
     # Handle Union / Optional (both typing.Union and Python 3.10+ X | Y)
     if origin is typing.Union or isinstance(annotation, types.UnionType):
-        non_none = [a for a in args if a is not type(None)]
+        non_none = [a for a in args if a is not types.NoneType]
         if len(non_none) == 1:
             return _format_type(non_none[0])
         return " | ".join(_format_type(a) for a in non_none)
@@ -97,8 +97,11 @@ def _resolve_template(name_or_path: str) -> type[Template] | None:
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)  # type: ignore[union-attr]
         for _name, obj in inspect.getmembers(module, inspect.isclass):
-            if issubclass(obj, Template) and obj is not Template:
-                return obj
+            try:
+                if issubclass(obj, Template) and obj is not Template:
+                    return obj
+            except TypeError:
+                continue
 
     return None
 
