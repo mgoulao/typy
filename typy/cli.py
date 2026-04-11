@@ -146,6 +146,9 @@ def cmd_render(
                 )
                 sys.exit(1)
             markdown_content = markdown_file.read_text(encoding="utf-8")
+            # Copy files from the markdown file's directory into the build dir so
+            # relative asset paths (e.g. "assets/image.png") resolve correctly.
+            builder.copy_assets_from(markdown_file.parent.resolve())
 
         if template is None:
             # --markdown only: render with BasicTemplate and sensible defaults
@@ -203,6 +206,9 @@ def cmd_render(
 
         output.parent.mkdir(parents=True, exist_ok=True)
         builder.save_pdf(output)
+        console.print(
+            f"[green]✓[/green] PDF saved to [cyan]{output.resolve()}[/cyan]"
+        )
 
     except FileNotFoundError as e:
         console.print(f"[red]Error:[/red] {e}")
@@ -252,7 +258,7 @@ def _generate_sample_data(template_cls: type[Template]) -> dict:
         if isinstance(ann, type):
             try:
                 if issubclass(ann, Content):
-                    return "# Section\n\nWrite your content here."
+                    return "Sample content for this document."
                 if issubclass(ann, pydantic.BaseModel):
                     return _for_model(ann)
             except TypeError:

@@ -102,6 +102,45 @@ class DocumentBuilder:
 
         return self
 
+    def copy_assets_from(self, source_dir: Path) -> "DocumentBuilder":
+        """Copy files from source_dir into the build temp dir.
+
+        This makes relative paths (e.g. ``assets/image.png``) in the document
+        resolvable during Typst compilation, which otherwise runs in an isolated
+        temporary directory.
+
+        Files named ``main.typ``, ``typy_data.typ``, and ``typy.typ`` are
+        intentionally excluded so the generated build files are not overwritten.
+
+        Args:
+            source_dir: Directory whose contents are copied to the build dir.
+
+        Returns:
+            self – enables method chaining.
+        """
+        ignore = shutil.ignore_patterns(
+            ".git",
+            "node_modules",
+            "__pycache__",
+            ".venv",
+            "venv",
+            "*.pyc",
+            "*.pyo",
+            "main.typ",
+            "typy_data.typ",
+            "typy.typ",
+        )
+        try:
+            shutil.copytree(
+                source_dir,
+                Path(self.tmp_dir.name),
+                dirs_exist_ok=True,
+                ignore=ignore,
+            )
+        except (shutil.Error, OSError):
+            pass  # Best-effort: don't fail if some assets can't be copied
+        return self
+
     def add_file(self, filepath: Path) -> Path:
         return Path(shutil.copy(filepath, Path(self.tmp_dir.name))).relative_to(
             Path(self.tmp_dir.name)

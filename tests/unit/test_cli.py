@@ -320,10 +320,10 @@ def test_generate_sample_data_report_required_str_fields_are_strings():
     assert isinstance(data["author"], str) and data["author"]
 
 
-def test_generate_sample_data_report_body_is_markdown_string():
+def test_generate_sample_data_report_body_is_string():
     data = _generate_sample_data(ReportTemplate)
     assert isinstance(data["body"], str)
-    assert "#" in data["body"]
+    assert len(data["body"]) > 0
 
 
 def test_generate_sample_data_report_toc_uses_default():
@@ -593,6 +593,34 @@ def test_cmd_render_markdown_only_calls_save_pdf(tmp_path):
         cmd_render(template=None, data_file=None, markdown_file=md, output=output)
 
     mock_save.assert_called_once_with(output)
+
+
+def test_cmd_render_prints_success_message(capsys, tmp_path):
+    """After a successful render, the output path is printed to stderr."""
+    md = tmp_path / "notes.md"
+    md.write_text("# Hello", encoding="utf-8")
+    output = tmp_path / "notes.pdf"
+
+    with patch("typy.builder.DocumentBuilder.save_pdf"):
+        cmd_render(template=None, data_file=None, markdown_file=md, output=output)
+
+    captured = capsys.readouterr()
+    assert "PDF saved" in captured.err
+    assert str(output.resolve()) in captured.err
+
+
+def test_cmd_render_markdown_copies_assets(tmp_path):
+    """When --markdown is given, assets from the markdown's directory are copied."""
+    md = tmp_path / "notes.md"
+    md.write_text("# Hello", encoding="utf-8")
+    (tmp_path / "assets").mkdir()
+    (tmp_path / "assets" / "logo.png").write_bytes(b"\x89PNG")
+
+    with patch("typy.builder.DocumentBuilder.save_pdf"):
+        with patch("typy.builder.DocumentBuilder.copy_assets_from") as mock_copy:
+            cmd_render(template=None, data_file=None, markdown_file=md, output=tmp_path / "out.pdf")
+
+    mock_copy.assert_called_once_with(tmp_path.resolve())
 
 
 def test_cmd_render_markdown_uses_filename_as_title(tmp_path):

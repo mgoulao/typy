@@ -298,3 +298,60 @@ def test_get_source_context_with_typy_data_file(tmp_path):
     result = builder._get_source_context("--> typy_data.typ:3:1 error")
     assert "typy_data.typ" in result
     assert "line3" in result
+
+
+# ---- copy_assets_from tests ----
+
+
+def test_copy_assets_from_copies_files(tmp_path):
+    """Files from source_dir are copied into the build temp dir."""
+    (tmp_path / "image.png").write_bytes(b"\x89PNG\r\n")
+    (tmp_path / "assets").mkdir()
+    (tmp_path / "assets" / "logo.png").write_bytes(b"\x89PNG\r\n")
+
+    builder = DocumentBuilder()
+    builder.copy_assets_from(tmp_path)
+
+    assert (Path(builder.tmp_dir.name) / "image.png").exists()
+    assert (Path(builder.tmp_dir.name) / "assets" / "logo.png").exists()
+
+
+def test_copy_assets_from_ignores_build_files(tmp_path):
+    """main.typ, typy_data.typ, and typy.typ are NOT overwritten by copy_assets_from."""
+    # Put sentinel content in source dir's typ files
+    (tmp_path / "main.typ").write_text("should not be copied", encoding="utf-8")
+    (tmp_path / "typy_data.typ").write_text("should not be copied", encoding="utf-8")
+
+    builder = DocumentBuilder()
+    # Pre-write a generated main.typ
+    (Path(builder.tmp_dir.name) / "main.typ").write_text("generated", encoding="utf-8")
+
+    builder.copy_assets_from(tmp_path)
+
+    content = (Path(builder.tmp_dir.name) / "main.typ").read_text(encoding="utf-8")
+    assert content == "generated"  # not overwritten
+
+
+def test_copy_assets_from_ignores_git_dir(tmp_path):
+    """.git directory is not copied."""
+    git_dir = tmp_path / ".git"
+    git_dir.mkdir()
+    (git_dir / "HEAD").write_text("ref: refs/heads/main", encoding="utf-8")
+
+    builder = DocumentBuilder()
+    builder.copy_assets_from(tmp_path)
+
+    assert not (Path(builder.tmp_dir.name) / ".git").exists()
+
+
+def test_copy_assets_from_returns_self(tmp_path):
+    """copy_assets_from supports method chaining by returning self."""
+    builder = DocumentBuilder()
+    result = builder.copy_assets_from(tmp_path)
+    assert result is builder
+
+
+def test_copy_assets_from_nonexistent_dir(tmp_path):
+    """copy_assets_from does not raise when source_dir does not exist."""
+    builder = DocumentBuilder()
+    builder.copy_assets_from(tmp_path / "nonexistent")  # should not raise
