@@ -1,18 +1,20 @@
 import json
-from unittest.mock import patch
 
 import pytest
+from typer.testing import CliRunner
 
 from typy.cli import (
     BUILTIN_TEMPLATES,
+    _build_app,
     _format_type,
     _get_field_rows,
     _resolve_template,
     cmd_info,
     cmd_list,
-    main,
 )
 from typy.templates import ReportTemplate
+
+runner = CliRunner()
 
 # ---- _format_type tests ----
 
@@ -40,7 +42,6 @@ def test_format_type_list_str():
 
 
 def test_format_type_list_nested():
-
     from typy.templates import InvoiceItem
 
     assert _format_type(list[InvoiceItem]) == "list[InvoiceItem]"
@@ -233,39 +234,38 @@ def test_cmd_info_json_optional_field_has_default(capsys):
     assert toc_field["default"] is True
 
 
-# ---- main() / argparse tests ----
+# ---- main() / typer CliRunner tests ----
 
 
-def test_main_list(capsys):
-    with patch("sys.argv", ["typy", "list"]):
-        main()
-    captured = capsys.readouterr()
-    assert "Available templates" in captured.out
+def test_main_list():
+    app = _build_app()
+    result = runner.invoke(app, ["list"])
+    assert result.exit_code == 0
+    assert "Available templates" in result.output
 
 
-def test_main_info(capsys):
-    with patch("sys.argv", ["typy", "info", "report"]):
-        main()
-    captured = capsys.readouterr()
-    assert "Template: report" in captured.out
+def test_main_info():
+    app = _build_app()
+    result = runner.invoke(app, ["info", "report"])
+    assert result.exit_code == 0
+    assert "Template: report" in result.output
 
 
-def test_main_info_json(capsys):
-    with patch("sys.argv", ["typy", "info", "report", "--json"]):
-        main()
-    captured = capsys.readouterr()
-    data = json.loads(captured.out)
+def test_main_info_json():
+    app = _build_app()
+    result = runner.invoke(app, ["info", "report", "--json"])
+    assert result.exit_code == 0
+    data = json.loads(result.output)
     assert data["template"] == "report"
 
 
-def test_main_no_command_exits_zero(capsys):
-    with patch("sys.argv", ["typy"]):
-        with pytest.raises(SystemExit) as exc_info:
-            main()
-    assert exc_info.value.code == 0
+def test_main_no_command_shows_help():
+    app = _build_app()
+    result = runner.invoke(app, [])
+    assert "typy" in result.output
 
 
-def test_main_info_custom_py_file(tmp_path, capsys):
+def test_main_info_custom_py_file(tmp_path):
     custom_file = tmp_path / "custom.py"
     custom_file.write_text(
         "from pathlib import Path\n"
@@ -279,8 +279,8 @@ def test_main_info_custom_py_file(tmp_path, capsys):
         "    __template_path__ = Path('/tmp/custom.typ')\n",
         encoding="utf-8",
     )
-    with patch("sys.argv", ["typy", "info", str(custom_file)]):
-        main()
-    captured = capsys.readouterr()
-    assert "name" in captured.out
-    assert "body" in captured.out
+    app = _build_app()
+    result = runner.invoke(app, ["info", str(custom_file)])
+    assert result.exit_code == 0
+    assert "name" in result.output
+    assert "body" in result.output

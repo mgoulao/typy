@@ -1,4 +1,3 @@
-import argparse
 import importlib.util
 import inspect
 import json
@@ -107,21 +106,29 @@ def _resolve_template(name_or_path: str) -> type[Template] | None:
 
 
 def cmd_list() -> None:
-    """Print all available built-in templates with a one-line description."""
-    print("Available templates:")
-    name_width = max(len(n) for n in BUILTIN_TEMPLATES) + 2
+    """List all available built-in templates with a one-line description."""
+    from rich.console import Console
+    from rich.table import Table
+
+    console = Console()
+    table = Table(title="Available templates", show_header=True, header_style="bold")
+    table.add_column("Name", style="cyan", no_wrap=True)
+    table.add_column("Description")
     for name, (_, description) in BUILTIN_TEMPLATES.items():
-        print(f"  {name:<{name_width}}{description}")
+        table.add_row(name, description)
+    console.print(table)
 
 
 def cmd_info(name_or_path: str, as_json: bool = False) -> None:
     """Print schema information for a template."""
     template_cls = _resolve_template(name_or_path)
     if template_cls is None:
-        print(
-            f"Error: template '{name_or_path}' not found. "
-            "Use 'typy list' to see available templates.",
-            file=sys.stderr,
+        from rich.console import Console
+
+        console = Console(stderr=True)
+        console.print(
+            f"[red]Error:[/red] template '{name_or_path}' not found. "
+            "Use 'typy list' to see available templates."
         )
         sys.exit(1)
 
@@ -143,53 +150,54 @@ def cmd_info(name_or_path: str, as_json: bool = False) -> None:
         print(json.dumps(output, indent=2, default=str))
         return
 
-    # Human-readable output
-    print(f"Template: {name_or_path}\n")
-    print("Fields:")
-    name_w = max((len(r["name"]) for r in rows), default=0) + 2
-    type_w = max((len(r["type"]) for r in rows), default=0) + 2
+    from rich.console import Console
+    from rich.table import Table
+
+    console = Console()
+    console.print(f"\nTemplate: [bold cyan]{name_or_path}[/bold cyan]\n")
+    table = Table(show_header=True, header_style="bold")
+    table.add_column("Field", style="cyan", no_wrap=True)
+    table.add_column("Type")
+    table.add_column("Required")
+    table.add_column("Default")
     for r in rows:
-        req_label = "required" if r["required"] else "optional"
-        default_part = "" if r["required"] else f"    default: {r['default']}"
-        print(
-            f"  {r['name']:<{name_w}}{r['type']:<{type_w}}{req_label}{default_part}"
-        )
+        req_text = "[green]required[/green]" if r["required"] else "[yellow]optional[/yellow]"
+        default_text = "" if r["required"] else str(r["default"])
+        table.add_row(r["name"], r["type"], req_text, default_text)
+    console.print(table)
+
+
+def _build_app():
+    """Build and return the typer CLI app. Exposed for testing."""
+    import typer
+
+    app = typer.Typer(
+        name="typy",
+        help="typy — generate PDF documents from Typst templates",
+        no_args_is_help=True,
+        add_completion=False,
+    )
+
+    @app.command("list")
+    def list_cmd():
+        """List all available built-in templates."""
+        cmd_list()
+
+    @app.command("info")
+    def info_cmd(
+        template: str = typer.Argument(
+            ..., help="Template name (e.g. 'report') or path to a Python file"
+        ),
+        json: bool = typer.Option(False, "--json", help="Output schema as JSON"),
+    ):
+        """Show schema for a template."""
+        cmd_info(template, as_json=json)
+
+    return app
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        prog="typy",
-        description="typy — generate PDF documents from Typst templates",
-    )
-    subparsers = parser.add_subparsers(dest="command")
-
-    # typy list
-    subparsers.add_parser("list", help="List all available built-in templates")
-
-    # typy info
-    info_parser = subparsers.add_parser(
-        "info", help="Show schema for a template"
-    )
-    info_parser.add_argument(
-        "template",
-        help="Template name (e.g. 'report') or path to a Python file",
-    )
-    info_parser.add_argument(
-        "--json",
-        action="store_true",
-        dest="as_json",
-        help="Output schema as JSON",
-    )
-
-    args = parser.parse_args()
-
-    if args.command == "list":
-        cmd_list()
-    elif args.command == "info":
-        cmd_info(args.template, as_json=args.as_json)
-    else:
-        parser.print_help()
-        sys.exit(0)
+    _build_app()()
 
 
 if __name__ == "__main__":
