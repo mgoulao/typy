@@ -1,0 +1,285 @@
+:root {
+  --typy-accent: #0f766e;
+  --typy-accent-2: #f59e0b;
+  --typy-card-bg: color-mix(in srgb, var(--color-background-primary) 92%, #ffffff 8%);
+  --typy-text-strong: color-mix(in srgb, var(--color-foreground-primary) 92%, #000000 8%);
+  --typy-text-muted: color-mix(in srgb, var(--color-foreground-primary) 72%, #6b7280 28%);
+  --typy-shadow-soft: 0 10px 24px rgba(2, 8, 23, 0.09);
+  --typy-shadow-lift: 0 16px 32px rgba(2, 8, 23, 0.14);
+  --typy-hero-bg:
+    radial-gradient(circle at 12% 18%, rgba(94, 234, 212, 0.22), transparent 38%),
+    radial-gradient(circle at 88% 14%, rgba(251, 191, 36, 0.16), transparent 34%),
+    linear-gradient(120deg, #ecfeff 0%, #fef9c3 100%);
+  --typy-hero-border: #8fd3ca;
+}
+
+[data-theme="light"] {
+  --typy-hero-bg: linear-gradient(
+    120deg,
+    #e6fffa 0%,
+    #fef3c7 100%
+  );
+  --typy-hero-bg:
+    radial-gradient(circle at 10% 18%, rgba(45, 212, 191, 0.22), transparent 36%),
+    radial-gradient(circle at 86% 12%, rgba(245, 158, 11, 0.20), transparent 34%),
+    linear-gradient(120deg, #e6fffa 0%, #fef3c7 100%);
+  --typy-hero-border: #8fd3ca;
+}
+
+[data-theme="dark"] {
+  --typy-hero-bg: linear-gradient(
+    120deg,
+    #0f172a 0%,
+    #1f2937 100%
+  );
+  --typy-hero-bg:
+    radial-gradient(circle at 10% 16%, rgba(45, 212, 191, 0.20), transparent 36%),
+    radial-gradient(circle at 88% 14%, rgba(245, 158, 11, 0.16), transparent 34%),
+    linear-gradient(120deg, #0f172a 0%, #1f2937 100%);
+  --typy-hero-border: #365f66;
+  --typy-card-bg: color-mix(in srgb, var(--color-background-primary) 90%, #0f172a 10%);
+  --typy-text-muted: color-mix(in srgb, var(--color-foreground-primary) 78%, #94a3b8 22%);
+  --typy-shadow-soft: 0 12px 28px rgba(0, 0, 0, 0.34);
+  --typy-shadow-lift: 0 18px 34px rgba(0, 0, 0, 0.44);
+}
+
+.typy-hero {
+  background: var(--typy-hero-bg);
+  border: 1px solid var(--typy-hero-border);
+  border-radius: 18px;
+  padding: 1.6rem 1.65rem;
+  margin: 1.1rem 0 1.7rem;
+  box-shadow: var(--typy-shadow-soft);
+  backdrop-filter: saturate(108%);
+}
+
+.typy-hero h1 {
+  margin: 0 0 0.7rem;
+  font-size: clamp(1.85rem, 2.6vw, 2.3rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--typy-text-strong);
+}
+
+.typy-hero p {
+  margin: 0.38rem 0;
+  font-size: 1.02rem;
+  line-height: 1.55;
+  max-width: 72ch;
+  color: var(--typy-text-muted);
+}
+
+.typy-cta {
+  display: inline-block;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--typy-accent) 92%, #22c55e 8%), var(--typy-accent));
+  color: #ffffff !important;
+  text-decoration: none;
+  border-radius: 999px;
+  padding: 0.52rem 1rem;
+  margin-right: 0.48rem;
+  margin-top: 0.85rem;
+  font-weight: 600;
+  font-size: 0.94rem;
+  border: 1px solid color-mix(in srgb, var(--typy-accent) 70%, #ffffff 30%);
+  transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+}
+
+.typy-cta.secondary {
+  background: color-mix(in srgb, var(--typy-accent) 58%, #0f172a 42%);
+}
+
+.typy-cta:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+  box-shadow: 0 8px 18px rgba(15, 118, 110, 0.28);
+}
+
+.typy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.95rem;
+  margin: 1.15rem 0 1.55rem;
+}
+
+.typy-card {
+  border: 1px solid color-mix(in srgb, var(--typy-accent) 18%, var(--color-background-border) 82%);
+  border-radius: 14px;
+  background: var(--typy-card-bg);
+  padding: 1rem;
+  box-shadow: var(--typy-shadow-soft);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.typy-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--typy-shadow-lift);
+  border-color: color-mix(in srgb, var(--typy-accent) 32%, var(--color-background-border) 68%);
+}
+
+.typy-card h3 {
+  margin: 0;
+  font-size: 1.04rem;
+  letter-spacing: -0.01em;
+  color: var(--typy-text-strong);
+}
+
+.typy-card p {
+  margin: 0.5rem 0 0.62rem;
+  font-size: 0.94rem;
+  line-height: 1.5;
+  color: var(--typy-text-muted);
+}
+
+.typy-card a {
+  color: var(--typy-accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.typy-card a::after {
+  content: " ->";
+  opacity: 0.82;
+}
+
+@media (max-width: 700px) {
+  .typy-hero {
+    padding: 1.25rem 1.15rem;
+    margin: 0.85rem 0 1.2rem;
+  }
+
+  .typy-cta {
+    margin-top: 0.65rem;
+  }
+}
+
+/* API autodoc readability */
+.content dl.py.class,
+.content dl.py.function,
+.content dl.py.method,
+.content dl.py.attribute,
+.content dl.py.property {
+  border: 1px solid color-mix(in srgb, var(--typy-accent) 16%, var(--color-background-border) 84%);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--color-background-primary) 96%, var(--typy-accent) 4%);
+  box-shadow: var(--typy-shadow-soft);
+  margin: 0.95rem 0 1.05rem;
+  overflow: hidden;
+}
+
+.content dl.py.class > dt,
+.content dl.py.function > dt,
+.content dl.py.method > dt,
+.content dl.py.attribute > dt,
+.content dl.py.property > dt {
+  background: color-mix(in srgb, var(--color-background-secondary) 92%, var(--typy-accent) 8%);
+  border-bottom: 1px solid color-mix(in srgb, var(--typy-accent) 16%, var(--color-background-border) 84%);
+  padding: 0.72rem 0.92rem;
+  margin: 0;
+  scroll-margin-top: 84px;
+}
+
+.content dl.py.class > dd,
+.content dl.py.function > dd,
+.content dl.py.method > dd,
+.content dl.py.attribute > dd,
+.content dl.py.property > dd {
+  padding: 0.82rem 0.92rem 0.92rem;
+  margin: 0;
+}
+
+.content .sig,
+.content .sig-name,
+.content .sig-prename,
+.content .sig-param,
+.content .sig-return,
+.content .sig-paren {
+  font-family: var(--font-stack--monospace);
+  font-size: 0.92rem;
+}
+
+.content .sig-name {
+  color: color-mix(in srgb, var(--typy-accent) 78%, var(--color-foreground-primary) 22%);
+  font-weight: 700;
+}
+
+.content .property {
+  color: var(--typy-text-muted);
+}
+
+.content .viewcode-link {
+  margin-left: 0.35rem;
+  font-size: 0.83rem;
+  opacity: 0.9;
+}
+
+.content dl.field-list.simple {
+  border-left: 3px solid color-mix(in srgb, var(--typy-accent) 48%, transparent 52%);
+  padding-left: 0.7rem;
+  margin: 0.68rem 0 0.2rem;
+}
+
+.content dl.field-list.simple dt {
+  font-weight: 650;
+}
+
+.content dl.field-list.simple dd {
+  margin-bottom: 0.42rem;
+}
+
+/* Stronger selectors for exact Sphinx autodoc DOM (dt.sig.sig-object.py) */
+article#furo-main-content dl.py > dt.sig.sig-object.py {
+  display: block;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+article#furo-main-content dl.py > dt.sig.sig-object.py .sig-prename.descclassname {
+  opacity: 0.72;
+  font-size: 0.9em;
+}
+
+article#furo-main-content dl.py > dt.sig.sig-object.py .sig-name.descname {
+  font-size: 1.03em;
+  font-weight: 750;
+}
+
+article#furo-main-content dl.py > dt.sig.sig-object.py .headerlink {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+article#furo-main-content dl.py > dt.sig.sig-object.py:hover .headerlink {
+  opacity: 0.8;
+}
+
+/* Keep nested methods readable and visually grouped under the parent class */
+article#furo-main-content dl.py.class > dd > dl.py.method,
+article#furo-main-content dl.py.class > dd > dl.py.attribute,
+article#furo-main-content dl.py.class > dd > dl.py.property {
+  margin: 0.72rem 0 0.72rem 0.4rem;
+  border-left: 3px solid color-mix(in srgb, var(--typy-accent) 40%, transparent 60%);
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+article#furo-main-content dl.py.class > dd > dl.py.method > dt,
+article#furo-main-content dl.py.class > dd > dl.py.attribute > dt,
+article#furo-main-content dl.py.class > dd > dl.py.property > dt {
+  background: color-mix(in srgb, var(--color-background-secondary) 96%, var(--typy-accent) 4%);
+}
+
+/* Parameter list readability */
+article#furo-main-content dl.field-list.simple > dt {
+  font-size: 0.92rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  opacity: 0.82;
+}
+
+article#furo-main-content dl.field-list.simple > dd p {
+  margin: 0.2rem 0;
+}
+
+article#furo-main-content dl.field-list.simple strong {
+  color: var(--typy-text-strong);
+}

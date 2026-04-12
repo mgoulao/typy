@@ -17,6 +17,20 @@ To install typy, you can use pip:
 pip install git+https://github.com/mgoulao/typy
 ```
 
+## Documentation website
+
+The project now includes a Sphinx documentation website in `docs/` with:
+* cookbook recipes
+* template and CLI reference
+* API reference generated from docstrings
+* an LLM-oriented quick-reference page
+
+Build it locally with:
+
+```bash
+uv run --group docs sphinx-build -n -W --keep-going -b html docs docs/_build/html
+```
+
 ## Basic usage
 
 The following code snippet shows how to create a simple PDF document using typy:
