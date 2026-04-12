@@ -7,6 +7,8 @@ Every recipe includes a clear goal and complete code or commands.
 
 Goal: render a report PDF containing a real table from analytics data.
 
+**Prerequisites:** `pandas` must be installed. Run `pip install "typy[pandas]"` or `pip install pandas`.
+
 ```python
 from datetime import date
 
