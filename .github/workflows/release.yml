@@ -32,13 +32,18 @@ jobs:
       - name: Bump version
         run: uv version --bump ${{ inputs.bump }}
 
+      - name: Regenerate lockfiles
+        run: |
+          uv lock
+          uvx --from poetry poetry lock
+
       - name: Get new version
         id: version
         run: echo "version=$(uv version | awk '{print $NF}')" >> "$GITHUB_OUTPUT"
 
       - name: Commit and tag
         run: |
-          git add pyproject.toml
+          git add pyproject.toml uv.lock poetry.lock
           git commit -m "Release v${{ steps.version.outputs.version }}"
           git tag -a "v${{ steps.version.outputs.version }}" -m "Release v${{ steps.version.outputs.version }}"
           git push --follow-tags
