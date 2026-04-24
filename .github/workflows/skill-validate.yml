@@ -1,0 +1,80 @@
+name: SKILL.md API Validation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "SKILL.md"
+      - "reference/**"
+      - "typy/**"
+  pull_request:
+    paths:
+      - "SKILL.md"
+      - "reference/**"
+      - "typy/**"
+
+jobs:
+  validate-skill-api:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@cec208311dfd045dd5311c1add060b2062131d57 # v8.0.0
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --frozen --no-default-groups
+
+      - name: Verify public API symbols exist
+        run: |
+          uv run --frozen --no-default-groups python - <<'EOF'
+          """Check that symbols referenced in SKILL.md and reference/*.md exist in the installed package."""
+          import importlib
+          import sys
+
+          # Map of module -> list of symbols that must be importable
+          REQUIRED_SYMBOLS = {
+              "typy.builder": ["DocumentBuilder"],
+              "typy.templates": [
+                  "Template",
+                  "BasicTemplate",
+                  "ReportTemplate",
+                  "LetterTemplate",
+                  "InvoiceTemplate",
+                  "CVTemplate",
+                  "AcademicTemplate",
+                  "PresentationTemplate",
+              ],
+              "typy.content": ["Content"],
+              "typy.functions": ["Block", "Figure", "Image", "Table", "Function", "Lorem", "Datetime"],
+              "typy.markup": ["Text", "Raw", "Heading", "Markdown"],
+              "typy.typst_encoder": ["TypstEncoder"],
+          }
+
+          errors = []
+          for module_name, symbols in REQUIRED_SYMBOLS.items():
+              try:
+                  mod = importlib.import_module(module_name)
+              except ImportError as e:
+                  errors.append(f"Cannot import module {module_name}: {e}")
+                  continue
+              for sym in symbols:
+                  if not hasattr(mod, sym):
+                      errors.append(f"Symbol not found: {module_name}.{sym}")
+
+          if errors:
+              print("API symbol validation FAILED:", file=sys.stderr)
+              for err in errors:
+                  print(f"  ✗ {err}", file=sys.stderr)
+              sys.exit(1)
+
+          total = sum(len(v) for v in REQUIRED_SYMBOLS.values())
+          print(f"✓ All {total} required API symbols are present.")
+          EOF

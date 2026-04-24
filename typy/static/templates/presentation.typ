@@ -18,7 +18,19 @@
 #for slide in typy("slides", "array") [
   == #slide.title
 
+  #if slide.subtitle != none [
+    #set text(size: 0.95em, fill: luma(90), style: "italic")
+    #slide.subtitle
+  ]
+
   #slide.body
+
+  #if slide.footnote != none [
+    #place(bottom + right, dy: -0.5em)[
+      #set text(size: 0.65em, fill: luma(100))
+      #slide.footnote
+    ]
+  ]
 
   #if slide.notes != none [
     #place(bottom + left, dy: -0.5em)[

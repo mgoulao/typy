@@ -27,6 +27,24 @@ def test_slide_with_notes_encodes_correctly():
     assert '"Speaker note text"' in encoded
 
 
+def test_slide_with_subtitle_and_footnote_encodes_correctly():
+    slide = Slide(
+        title="With Metadata",
+        subtitle="Short subtitle",
+        body=Content("Body"),
+        footnote="Reference 1",
+    )
+    encoded = TypstEncoder.encode(slide)
+    assert '"Short subtitle"' in encoded
+    assert '"Reference 1"' in encoded
+
+
+def test_slide_layout_variant_optional():
+    slide = Slide(title="Variant", body=Content("Body"), layout_variant="two-column")
+    encoded = TypstEncoder.encode(slide)
+    assert '"two-column"' in encoded
+
+
 def test_slide_body_as_content_block():
     slide = Slide(title="Slide", body=Content("Some content"))
     encoded = TypstEncoder.encode(slide)
@@ -145,3 +163,24 @@ def test_slide_notes_included_in_template_data():
     )
     encoded = TypstEncoder.encode(template.get_data())
     assert '"My speaker notes"' in encoded
+
+
+def test_slide_new_fields_included_in_template_data():
+    template = PresentationTemplate(
+        title="T",
+        author="A",
+        date="2024-01-01",
+        slides=[
+            Slide(
+                title="S",
+                subtitle="Sub",
+                body=Content("B"),
+                footnote="Fn",
+                layout_variant="hero",
+            ),
+        ],
+    )
+    encoded = TypstEncoder.encode(template.get_data())
+    assert '"Sub"' in encoded
+    assert '"Fn"' in encoded
+    assert '"hero"' in encoded
