@@ -4,7 +4,7 @@ consume-basic.py — Flow A: Consume a built-in template
 End-to-end example: BasicTemplate with a table and an image.
 
 Run from the repo root:
-    python examples/consume-basic.py
+    python skills/typy/examples/consume-basic.py
 Then verify:
     python scripts/verify_pdf.py /tmp/consume-basic.pdf
 """
@@ -20,10 +20,12 @@ from typy.templates import BasicTemplate
 # ── 1. Create the builder ──────────────────────────────────────────────────
 builder = DocumentBuilder()
 
+repo_root = Path(__file__).resolve().parents[3]
+
 # ── 2. Register assets BEFORE constructing Content that references them ────
 #       add_file copies the file into the build directory and returns the
 #       relative path that Typst can resolve.
-img_path = builder.add_file(Path(__file__).parent / "basic" / "example.png")
+img_path = builder.add_file(repo_root / "examples" / "basic" / "example.png")
 
 # ── 3. Build the body ──────────────────────────────────────────────────────
 body = Block(

@@ -59,7 +59,7 @@ builder.add_template(template).save_pdf("output.pdf")
 
 ### Standard path (assets + table + image)
 
-See [`../../examples/consume-basic.py`](../../examples/consume-basic.py) for a complete
+See [`examples/consume-basic.py`](examples/consume-basic.py) for a complete
 example that adds an image and a data table.
 
 Key rules:
@@ -138,12 +138,12 @@ If a slide body can overflow, consider wrapping key regions in Typst with
 explicit clipping, for example `#block(height: 100%, clip: true)[ ... ]`, and
 review the rendered page count before publishing.
 
-On error, consult [`../../reference/troubleshooting.md`](../../reference/troubleshooting.md).
+On error, consult [`reference/troubleshooting.md`](reference/troubleshooting.md).
 
 ### Advanced path
 
-→ [`../../reference/api-cheatsheet.md`](../../reference/api-cheatsheet.md) — full API surface
-→ [`../../reference/template-authoring.md`](../../reference/template-authoring.md) — encoding details
+→ [`reference/api-cheatsheet.md`](reference/api-cheatsheet.md) — full API surface
+→ [`reference/template-authoring.md`](reference/template-authoring.md) — encoding details
 
 ---
 
@@ -199,8 +199,8 @@ entrypoint is `main.typ`.
 
 ### Standard path
 
-See [`../../examples/author-python-template.py`](../../examples/author-python-template.py)
-and [`../../examples/author-typst-template.typ`](../../examples/author-typst-template.typ).
+See [`examples/author-python-template.py`](examples/author-python-template.py)
+and [`examples/author-typst-template.typ`](examples/author-typst-template.typ).
 
 ### Presentation template authoring (slide decks)
 
@@ -265,9 +265,9 @@ subprocess.run(["python", "scripts/verify_pdf.py", "/tmp/realistic.pdf"], check=
 
 ### Advanced path
 
-→ [`../../reference/template-authoring.md`](../../reference/template-authoring.md) — deep dive on the Python↔Typst contract
-→ [`../../reference/typst-primer.md`](../../reference/typst-primer.md) — Typst syntax agents need
-→ [`../../reference/troubleshooting.md`](../../reference/troubleshooting.md) — encoding errors and fixes
+→ [`reference/template-authoring.md`](reference/template-authoring.md) — deep dive on the Python↔Typst contract
+→ [`reference/typst-primer.md`](reference/typst-primer.md) — Typst syntax agents need
+→ [`reference/troubleshooting.md`](reference/troubleshooting.md) — encoding errors and fixes
 
 ---
 

@@ -5,21 +5,23 @@ on:
     branches:
       - main
     paths:
-      - "examples/consume-basic.py"
-      - "examples/consume-custom.py"
-      - "examples/author-python-template.py"
-      - "examples/author-typst-template.typ"
+      - "skills/typy/examples/consume-basic.py"
+      - "skills/typy/examples/consume-custom.py"
+      - "skills/typy/examples/author-python-template.py"
+      - "skills/typy/examples/author-typst-template.typ"
       - "scripts/verify_pdf.py"
+      - "skills/typy/SKILL.md"
+      - "skills/typy/reference/**"
       - "typy/**"
   pull_request:
     paths:
-      - "examples/consume-basic.py"
-      - "examples/consume-custom.py"
-      - "examples/author-python-template.py"
-      - "examples/author-typst-template.typ"
+      - "skills/typy/examples/consume-basic.py"
+      - "skills/typy/examples/consume-custom.py"
+      - "skills/typy/examples/author-python-template.py"
+      - "skills/typy/examples/author-typst-template.typ"
       - "scripts/verify_pdf.py"
-      - "SKILL.md"
-      - "reference/**"
+      - "skills/typy/SKILL.md"
+      - "skills/typy/reference/**"
       - "typy/**"
 
 jobs:
@@ -41,19 +43,19 @@ jobs:
         run: uv sync --frozen --no-default-groups
 
       - name: Run consume-basic example (Flow A)
-        run: uv run --frozen --no-default-groups python examples/consume-basic.py
+        run: uv run --frozen --no-default-groups python skills/typy/examples/consume-basic.py
 
       - name: Verify consume-basic PDF
         run: uv run --frozen --no-default-groups python scripts/verify_pdf.py /tmp/consume-basic.pdf
 
       - name: Run consume-custom example (Flow A — custom template)
-        run: uv run --frozen --no-default-groups python examples/consume-custom.py
+        run: uv run --frozen --no-default-groups python skills/typy/examples/consume-custom.py
 
       - name: Verify consume-custom PDF
         run: uv run --frozen --no-default-groups python scripts/verify_pdf.py /tmp/consume-custom.pdf
 
       - name: Run author-python-template example (Flow B — minimal)
-        run: uv run --frozen --no-default-groups python examples/author-python-template.py
+        run: uv run --frozen --no-default-groups python skills/typy/examples/author-python-template.py
 
       - name: Verify author-minimal PDF
         run: uv run --frozen --no-default-groups python scripts/verify_pdf.py /tmp/author-minimal.pdf

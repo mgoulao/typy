@@ -7,7 +7,7 @@ Demonstrates how to use a custom Template subclass (defined in a separate
 The matching Typst file is examples/author-typst-template.typ.
 
 Run from the repo root:
-    python examples/consume-custom.py
+    python skills/typy/examples/consume-custom.py
 Then verify:
     python scripts/verify_pdf.py /tmp/consume-custom.pdf
 """

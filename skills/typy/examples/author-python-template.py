@@ -7,7 +7,7 @@ Shows the complete pattern for creating a new Template class with:
 - A minimal roundtrip render test
 
 Run from the repo root:
-    python examples/author-python-template.py
+    python skills/typy/examples/author-python-template.py
 Then verify:
     python scripts/verify_pdf.py /tmp/author-minimal.pdf
     python scripts/verify_pdf.py /tmp/author-realistic.pdf
