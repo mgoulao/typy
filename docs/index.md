@@ -46,6 +46,11 @@ typy render --template report --data data.json --output report.pdf
 		<a href="api/index.html">Read API</a>
 	</article>
 	<article class="typy-card">
+		<h3>Package format</h3>
+		<p>RFC: .typy container structure, manifest v1 schema, versioning policy, and error model.</p>
+		<a href="package-format.html">Read RFC</a>
+	</article>
+	<article class="typy-card">
 		<h3>LLM resources</h3>
 		<p>Machine-oriented entry points and generated llms.txt context files.</p>
 		<a href="llm.html">Open LLM page</a>
@@ -62,6 +67,7 @@ cookbook
 getting-started
 templates
 cli
+package-format
 api/index
 llm
 ```
