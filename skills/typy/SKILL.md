@@ -24,7 +24,7 @@ pip install git+https://github.com/mgoulao/typy
 |---|---|
 | **Typst template** | A `.typ` file using `init_typy` + `typy_data.typ` |
 | **Python `Template` subclass** | A Pydantic model that binds to a `.typ` file via `__template_path__` |
-| **`.typy` package** | A distributable bundle (export/import via CLI — *planned*) |
+| **`.typy` package** | A distributable bundle (managed via `typy package` export/install/validate) |
 
 ---
 
@@ -59,7 +59,7 @@ builder.add_template(template).save_pdf("output.pdf")
 
 ### Standard path (assets + table + image)
 
-See [`examples/consume-basic.py`](examples/consume-basic.py) for a complete
+See [`../../examples/consume-basic.py`](../../examples/consume-basic.py) for a complete
 example that adds an image and a data table.
 
 Key rules:
@@ -127,12 +127,12 @@ typy render --template report --markdown body.md --output report.pdf
 python scripts/verify_pdf.py output.pdf
 ```
 
-On error, consult [`reference/troubleshooting.md`](reference/troubleshooting.md).
+On error, consult [`../../reference/troubleshooting.md`](../../reference/troubleshooting.md).
 
 ### Advanced path
 
-→ [`reference/api-cheatsheet.md`](reference/api-cheatsheet.md) — full API surface
-→ [`reference/template-authoring.md`](reference/template-authoring.md) — encoding details
+→ [`../../reference/api-cheatsheet.md`](../../reference/api-cheatsheet.md) — full API surface
+→ [`../../reference/template-authoring.md`](../../reference/template-authoring.md) — encoding details
 
 ---
 
@@ -185,8 +185,8 @@ Pair it with a matching `.typ` file — see Quick path below.
 
 ### Standard path
 
-See [`examples/author-python-template.py`](examples/author-python-template.py)
-and [`examples/author-typst-template.typ`](examples/author-typst-template.typ).
+See [`../../examples/author-python-template.py`](../../examples/author-python-template.py)
+and [`../../examples/author-typst-template.typ`](../../examples/author-typst-template.typ).
 
 ### Roundtrip test
 
@@ -209,19 +209,40 @@ subprocess.run(["python", "scripts/verify_pdf.py", "/tmp/realistic.pdf"], check=
 
 ### Advanced path
 
-→ [`reference/template-authoring.md`](reference/template-authoring.md) — deep dive on the Python↔Typst contract
-→ [`reference/typst-primer.md`](reference/typst-primer.md) — Typst syntax agents need
-→ [`reference/troubleshooting.md`](reference/troubleshooting.md) — encoding errors and fixes
+→ [`../../reference/template-authoring.md`](../../reference/template-authoring.md) — deep dive on the Python↔Typst contract
+→ [`../../reference/typst-primer.md`](../../reference/typst-primer.md) — Typst syntax agents need
+→ [`../../reference/troubleshooting.md`](../../reference/troubleshooting.md) — encoding errors and fixes
 
 ---
 
 ## Flow C — Package / distribute
 
-> **Status:** `.typy` packaging is planned (see issue #38). The `typy package`
-> CLI subcommand is not yet available. Use this flow when it lands.
+`.typy` packaging is implemented via the `typy package` CLI.
 
-See [`reference/packaging.md`](reference/packaging.md) for the planned workflow
-and how to track when it is available.
+### Standard package workflow
+
+```bash
+# 1) Export a package from your template.py + manifest.json
+typy package export path/to/template.py --manifest path/to/manifest.json --output my-template.typy
+
+# 2) Validate the package before sharing
+typy package validate my-template.typy
+
+# 3) Install into local template store
+typy package install my-template.typy
+```
+
+After install, use `typy list` to confirm availability, then render with either:
+
+```bash
+# By installed package/template name
+typy render --template my-template --data data.json --output output.pdf
+
+# Or directly from the package file (no install step)
+typy render --template my-template.typy --data data.json --output output.pdf
+```
+
+See [`reference/packaging.md`](reference/packaging.md) for packaging details.
 
 ---
 
