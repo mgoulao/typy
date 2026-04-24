@@ -93,12 +93,10 @@ typy package install my-template.typy --force   # overwrite existing
 ```
 
 After installation the package is unpacked to
-`<store>/<name>/<version>/` and the `template.py` inside can be passed
-directly to `typy render`:
+`<store>/<name>/<version>/` and can be used by name in `typy render`:
 
 ```bash
-typy render --template ~/.typy/packages/my-report/1.0.0/template.py \
-    --data data.json --output report.pdf
+typy render --template my-report --data data.json --output report.pdf
 ```
 
 ## Typical package workflow
@@ -116,13 +114,11 @@ typy package export template.py \
 # 3. Validate before distribution
 typy package validate my-report.typy
 
-# 4. End-user installs the package
-typy package install my-report.typy
+# --- Option A: render directly from the .typy file (no install needed) ---
+typy render --template my-report.typy --data data.json --output report.pdf
 
-# 5. Render a document using the installed template
-typy render \
-    --template ~/.typy/packages/my-report/1.0.0/template.py \
-    --data data.json \
-    --output report.pdf
+# --- Option B: install once, then use by name like a built-in template ---
+typy package install my-report.typy
+typy render --template my-report --data data.json --output report.pdf
 ```
 

@@ -95,13 +95,37 @@ def _get_field_rows(template_cls: type[Template]) -> list[dict]:
     return rows
 
 
-def _resolve_template(name_or_path: str) -> type[Template] | None:
+def _get_latest_installed(name: str, store_dir: Path) -> Path | None:
+    """Return the install directory for the latest version of *name*, or None."""
+    pkg_dir = store_dir / name
+    if not pkg_dir.is_dir():
+        return None
+    from packaging.version import InvalidVersion, Version
+
+    candidates: list[tuple[Version, Path]] = []
+    for entry in pkg_dir.iterdir():
+        if entry.is_dir():
+            try:
+                candidates.append((Version(entry.name), entry))
+            except InvalidVersion:
+                pass
+    if not candidates:
+        return None
+    candidates.sort(key=lambda x: x[0])
+    return candidates[-1][1]
+
+
+def _resolve_template(
+    name_or_path: str,
+    store_dir: Path | None = None,
+) -> type[Template] | None:
     """
     Resolve a template name or path to a Template subclass.
 
     Accepts:
     - A built-in template name (e.g. "report")
     - A path to a Python file containing a Template subclass
+    - An installed package name (looked up in the local template store)
     """
     # 1. Check built-in registry first
     if name_or_path in BUILTIN_TEMPLATES:
@@ -121,6 +145,25 @@ def _resolve_template(name_or_path: str) -> type[Template] | None:
                     return obj
             except TypeError:
                 continue
+
+    # 3. Check local template store
+    if store_dir is None:
+        store_dir = Path.home() / ".typy" / "packages"
+    install_dir = _get_latest_installed(name_or_path, store_dir)
+    if install_dir is not None:
+        template_py = install_dir / "template.py"
+        if template_py.exists():
+            spec = importlib.util.spec_from_file_location("_installed_template", template_py)
+            if spec is None or spec.loader is None:
+                return None
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)  # type: ignore[union-attr]
+            for _name, obj in inspect.getmembers(module, inspect.isclass):
+                try:
+                    if issubclass(obj, Template) and obj is not Template:
+                        return obj
+                except TypeError:
+                    continue
 
     return None
 
@@ -154,6 +197,31 @@ def cmd_render(
             "[red]Error:[/red] Specify at least one of --template or --markdown."
         )
         sys.exit(1)
+
+    # If the template is a .typy package file, extract it to a temporary
+    # directory and render directly without a prior install step.
+    # The TemporaryDirectory object is kept alive for the duration of this
+    # function so that __template_path__ continues to resolve during rendering.
+    _typy_tmpdir = None
+    if template is not None and Path(template).suffix == ".typy":
+        import tempfile
+        import zipfile
+
+        pkg_path = Path(template)
+        if not pkg_path.exists():
+            console.print(f"[red]Error:[/red] Package file not found: {template}")
+            sys.exit(1)
+        _typy_tmpdir = tempfile.TemporaryDirectory()
+        try:
+            with zipfile.ZipFile(pkg_path, "r") as zf:
+                zf.extractall(_typy_tmpdir.name)
+        except zipfile.BadZipFile:
+            console.print(
+                f"[red]Error:[/red] '{template}' is not a valid .typy package."
+            )
+            _typy_tmpdir.cleanup()
+            sys.exit(1)
+        template = str(Path(_typy_tmpdir.name) / "template.py")
 
     try:
         builder = DocumentBuilder()

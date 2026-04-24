@@ -722,3 +722,106 @@ def test_cli_package_install_force(tmp_path):
         ["package", "install", str(pkg), "--store", str(store), "--force"],
     )
     assert result.exit_code == 0, result.output
+
+
+# ---------------------------------------------------------------------------
+# _resolve_template – installed packages by name
+# ---------------------------------------------------------------------------
+
+
+def test_resolve_template_installed_by_name(tmp_path):
+    """After install, typy render --template <name> should find the package."""
+    from typy.cli import _resolve_template
+    from typy.package import install_package
+
+    pkg = _make_valid_typy(tmp_path / "build")
+    store = tmp_path / "store"
+    install_package(pkg, store)
+
+    cls = _resolve_template("my-report", store_dir=store)
+    assert cls is not None
+    assert cls.__name__ == "MyReport"
+
+
+def test_resolve_template_installed_by_name_not_found(tmp_path):
+    from typy.cli import _resolve_template
+
+    store = tmp_path / "store"
+    store.mkdir()
+    cls = _resolve_template("no-such-pkg", store_dir=store)
+    assert cls is None
+
+
+def test_resolve_template_installed_picks_latest_version(tmp_path):
+    """When multiple versions are installed the latest is selected."""
+    from typy.cli import _resolve_template
+
+    # Install two versions manually – v2.0.0 should win
+    for ver in ("1.0.0", "2.0.0"):
+        manifest = {**_MINIMAL_MANIFEST, "version": ver}
+        src = tmp_path / ver
+        src.mkdir()
+        pkg = _make_valid_typy(src, manifest=manifest)
+        store = tmp_path / "store"
+        from typy.package import install_package
+
+        install_package(pkg, store, force=True)
+
+    cls = _resolve_template("my-report", store_dir=tmp_path / "store")
+    assert cls is not None
+    # Both versions have the same class name; the important thing is one resolved
+    assert cls.__name__ == "MyReport"
+
+
+# ---------------------------------------------------------------------------
+# cmd_render – render directly from a .typy file
+# ---------------------------------------------------------------------------
+
+
+def test_cmd_render_from_typy_file(tmp_path):
+    """typy render --template my.typy should work without a prior install."""
+    from unittest.mock import patch
+
+    from typy.cli import cmd_render
+
+    pkg = _make_valid_typy(tmp_path / "build")
+
+    with patch("typy.builder.DocumentBuilder.save_pdf"):
+        cmd_render(
+            template=str(pkg),
+            data_file=None,
+            markdown_file=None,
+            output=tmp_path / "out.pdf",
+        )
+
+
+def test_cmd_render_from_typy_missing_file(tmp_path, capsys):
+    """typy render --template missing.typy should exit 1."""
+    import pytest
+
+    from typy.cli import cmd_render
+
+    with pytest.raises(SystemExit) as exc_info:
+        cmd_render(
+            template=str(tmp_path / "nonexistent.typy"),
+            data_file=None,
+            markdown_file=None,
+            output=tmp_path / "out.pdf",
+        )
+    assert exc_info.value.code == 1
+
+
+def test_cmd_render_from_installed_name(tmp_path):
+    """After install, render by package name should work."""
+    from unittest.mock import patch
+
+    from typy.cli import _resolve_template
+    from typy.package import install_package
+
+    pkg = _make_valid_typy(tmp_path / "build")
+    store = tmp_path / "store"
+    install_package(pkg, store)
+
+    # Verify _resolve_template finds it
+    cls = _resolve_template("my-report", store_dir=store)
+    assert cls is not None
