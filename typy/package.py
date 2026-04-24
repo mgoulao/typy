@@ -427,9 +427,7 @@ def export_package(
 
     output.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED) as zf:
-        zf.writestr(
-            "manifest.json", json.dumps(manifest, indent=2, ensure_ascii=False)
-        )
+        zf.writestr("manifest.json", json.dumps(manifest, indent=2, ensure_ascii=False))
         zf.writestr("template.py", template_src)
         zf.write(typ_src, archive_typ_path)
 

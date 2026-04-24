@@ -38,12 +38,14 @@ builder = DocumentBuilder()
 template = SimpleReportTemplate(
     title="Custom Template Demo",
     author="Bob Smith",
-    body=Content([
-        Text("Overview: This PDF was generated from a custom template."),
-        Text("- Item one"),
-        Text("- Item two"),
-        Text("- Item three"),
-    ]),
+    body=Content(
+        [
+            Text("Overview: This PDF was generated from a custom template."),
+            Text("- Item one"),
+            Text("- Item two"),
+            Text("- Item three"),
+        ]
+    ),
 )
 
 # ── 4. Render ──────────────────────────────────────────────────────────────

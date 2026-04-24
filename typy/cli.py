@@ -153,7 +153,9 @@ def _resolve_template(
     if install_dir is not None:
         template_py = install_dir / "template.py"
         if template_py.exists():
-            spec = importlib.util.spec_from_file_location("_installed_template", template_py)
+            spec = importlib.util.spec_from_file_location(
+                "_installed_template", template_py
+            )
             if spec is None or spec.loader is None:
                 return None
             module = importlib.util.module_from_spec(spec)

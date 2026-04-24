@@ -83,7 +83,9 @@ class PresentationTemplate(Template):
     slides: list[Slide]
 
     __template_name__ = "presentation"
-    __template_path__ = Path(__file__).parent / "static" / "templates" / "presentation.typ"
+    __template_path__ = (
+        Path(__file__).parent / "static" / "templates" / "presentation.typ"
+    )
 
 
 # =================

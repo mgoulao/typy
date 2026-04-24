@@ -89,11 +89,13 @@ def test_diagnostic_str_with_hint():
 
 def test_patch_template_path_absolute():
     src = (
-        "class T(Template):\n"
-        "    __template_path__ = Path('/abs/path/to/report.typ')\n"
+        "class T(Template):\n    __template_path__ = Path('/abs/path/to/report.typ')\n"
     )
     result = _patch_template_path(src, "report.typ")
-    assert '__template_path__ = Path(__file__).parent / "templates" / "report.typ"' in result
+    assert (
+        '__template_path__ = Path(__file__).parent / "templates" / "report.typ"'
+        in result
+    )
 
 
 def test_patch_template_path_already_relative():
@@ -683,9 +685,7 @@ def test_cli_package_install(tmp_path):
     store = tmp_path / "store"
     app = _build_app()
     runner = CliRunner()
-    result = runner.invoke(
-        app, ["package", "install", str(pkg), "--store", str(store)]
-    )
+    result = runner.invoke(app, ["package", "install", str(pkg), "--store", str(store)])
     assert result.exit_code == 0, result.output
     assert (store / "my-report" / "1.0.0" / "template.py").exists()
 
@@ -700,9 +700,7 @@ def test_cli_package_install_already_installed(tmp_path):
     app = _build_app()
     runner = CliRunner()
     runner.invoke(app, ["package", "install", str(pkg), "--store", str(store)])
-    result = runner.invoke(
-        app, ["package", "install", str(pkg), "--store", str(store)]
-    )
+    result = runner.invoke(app, ["package", "install", str(pkg), "--store", str(store)])
     assert result.exit_code == 1
     assert "already installed" in result.output
 
@@ -813,7 +811,6 @@ def test_cmd_render_from_typy_missing_file(tmp_path, capsys):
 
 def test_cmd_render_from_installed_name(tmp_path):
     """After install, render by package name should work."""
-    from unittest.mock import patch
 
     from typy.cli import _resolve_template
     from typy.package import install_package

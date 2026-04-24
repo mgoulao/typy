@@ -63,8 +63,7 @@ def verify_pdf(path: Path, min_pages: int = 1, quiet: bool = False) -> bool:
     # Check 3: valid PDF magic bytes
     if not data.startswith(b"%PDF"):
         errors.append(
-            f"Not a valid PDF (missing %PDF magic bytes). "
-            f"First 8 bytes: {data[:8]!r}"
+            f"Not a valid PDF (missing %PDF magic bytes). First 8 bytes: {data[:8]!r}"
         )
 
     # Check 4: page count
@@ -72,8 +71,7 @@ def verify_pdf(path: Path, min_pages: int = 1, quiet: bool = False) -> bool:
         pages = _count_pages(data)
         if pages < min_pages:
             errors.append(
-                f"Expected at least {min_pages} page(s), found {pages}. "
-                f"File: {path}"
+                f"Expected at least {min_pages} page(s), found {pages}. File: {path}"
             )
 
     if errors:

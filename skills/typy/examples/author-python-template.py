@@ -43,7 +43,7 @@ class TechnicalReportTemplate(Template):
     author: str
     date: str
     executive_summary: Optional[str] = None  # optional with default None
-    body: Content                            # rich content block
+    body: Content  # rich content block
 
 
 # ── 3. Minimal roundtrip test ─────────────────────────────────────────────
@@ -69,11 +69,15 @@ def render_realistic():
         author="Alice Engineer",
         date="2024-06-15",
         executive_summary="This report describes the revised architecture.",
-        body=Content([
-            Text("Background: The legacy system was replaced in Q2."),
-            Text("Findings: Latency reduced by 40 percent. Uptime improved. Cost down 15 percent."),
-            Text("Recommendations: Proceed with full rollout in Q3."),
-        ]),
+        body=Content(
+            [
+                Text("Background: The legacy system was replaced in Q2."),
+                Text(
+                    "Findings: Latency reduced by 40 percent. Uptime improved. Cost down 15 percent."
+                ),
+                Text("Recommendations: Proceed with full rollout in Q3."),
+            ]
+        ),
     )
     out = Path("/tmp/author-realistic.pdf")
     builder.add_template(template).save_pdf(out)
