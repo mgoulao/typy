@@ -404,6 +404,120 @@ def cmd_info(name_or_path: str, as_json: bool = False) -> None:
     console.print(table)
 
 
+def cmd_package_validate(package_path: Path) -> None:
+    """Validate a .typy package and report diagnostics."""
+    from rich.console import Console
+
+    from typy.package import validate_package
+
+    console = Console()
+    console_err = Console(stderr=True)
+
+    diagnostics = validate_package(package_path)
+    if not diagnostics:
+        console.print(
+            f"[green]✓[/green] [cyan]{package_path}[/cyan] is a valid .typy package."
+        )
+        return
+
+    console_err.print(
+        f"[red]✗[/red] [cyan]{package_path}[/cyan] has {len(diagnostics)} error(s):\n"
+    )
+    for diag in diagnostics:
+        console_err.print(f"  [bold red]{diag.code}[/bold red]  {diag.message}")
+        if diag.hint:
+            console_err.print(f"          [yellow]Hint:[/yellow] {diag.hint}")
+    sys.exit(1)
+
+
+def cmd_package_export(
+    template_py: Path,
+    manifest_file: Path,
+    output: Path,
+    assets_dir: Path | None,
+    readme: Path | None,
+) -> None:
+    """Export a template as a .typy package."""
+    from rich.console import Console
+
+    from typy.package import export_package
+
+    console = Console(stderr=True)
+
+    if not template_py.exists():
+        console.print(f"[red]Error:[/red] template.py not found: {template_py}")
+        sys.exit(1)
+
+    if not manifest_file.exists():
+        console.print(f"[red]Error:[/red] manifest file not found: {manifest_file}")
+        sys.exit(1)
+
+    try:
+        with open(manifest_file, encoding="utf-8") as f:
+            manifest = json.load(f)
+    except json.JSONDecodeError as e:
+        console.print(f"[red]Error:[/red] Invalid JSON in '{manifest_file}': {e}")
+        sys.exit(1)
+
+    try:
+        export_package(
+            template_py=template_py,
+            manifest=manifest,
+            output=output,
+            assets_dir=assets_dir,
+            readme=readme,
+        )
+    except (FileNotFoundError, ValueError) as e:
+        console.print(f"[red]Error:[/red] {e}")
+        sys.exit(1)
+    except Exception as e:
+        console.print(f"[red]Error:[/red] Export failed: {e}")
+        sys.exit(1)
+
+    Console().print(
+        f"[green]✓[/green] Package exported to [cyan]{output.resolve()}[/cyan]"
+    )
+
+
+def cmd_package_install(
+    package_path: Path,
+    store_dir: Path,
+    force: bool,
+) -> None:
+    """Install a .typy package into the local template store."""
+    from rich.console import Console
+
+    from typy.package import PackageValidationError, install_package
+
+    console = Console(stderr=True)
+
+    if not package_path.exists():
+        console.print(f"[red]Error:[/red] Package file not found: {package_path}")
+        sys.exit(1)
+
+    try:
+        install_dir = install_package(package_path, store_dir, force=force)
+    except PackageValidationError as e:
+        console.print("[red]Error:[/red] Package validation failed:\n")
+        for diag in e.diagnostics:
+            console.print(f"  [bold red]{diag.code}[/bold red]  {diag.message}")
+            if diag.hint:
+                console.print(f"          [yellow]Hint:[/yellow] {diag.hint}")
+        sys.exit(1)
+    except FileExistsError as e:
+        console.print(f"[red]Error:[/red] {e}")
+        sys.exit(1)
+    except Exception as e:
+        console.print(f"[red]Error:[/red] Install failed: {e}")
+        sys.exit(1)
+
+    Console().print(
+        f"[green]✓[/green] Package installed to [cyan]{install_dir}[/cyan]\n"
+        f"Use [cyan]typy render --template {install_dir / 'template.py'}[/cyan] "
+        "to render a document."
+    )
+
+
 def _build_app():
     """Build and return the typer CLI app. Exposed for testing."""
     import typer
@@ -505,6 +619,74 @@ def _build_app():
             markdown_file=markdown,
             output=output,
         )
+
+    # ---- package sub-app ----
+    package_app = typer.Typer(
+        name="package",
+        help="Manage .typy template packages (export, install, validate).",
+        no_args_is_help=True,
+    )
+    app.add_typer(package_app, name="package")
+
+    @package_app.command("validate")
+    def package_validate_cmd(
+        package: Path = typer.Argument(
+            ...,
+            help="Path to the .typy package file to validate.",
+        ),
+    ):
+        """Validate the structure and manifest of a .typy package."""
+        cmd_package_validate(package)
+
+    @package_app.command("export")
+    def package_export_cmd(
+        template_py: Path = typer.Argument(
+            ...,
+            help="Path to the template.py file containing the Template subclass.",
+        ),
+        manifest_file: Path = typer.Option(
+            ...,
+            "--manifest",
+            help="Path to the manifest.json file.",
+        ),
+        output: Path = typer.Option(
+            ...,
+            "--output",
+            help="Destination path for the generated .typy package.",
+        ),
+        assets_dir: typing.Optional[Path] = typer.Option(
+            None,
+            "--assets",
+            help="Optional directory of static assets to bundle under assets/.",
+        ),
+        readme: typing.Optional[Path] = typer.Option(
+            None,
+            "--readme",
+            help="Optional README file to bundle as README.md.",
+        ),
+    ):
+        """Export a template as a .typy package archive."""
+        cmd_package_export(template_py, manifest_file, output, assets_dir, readme)
+
+    @package_app.command("install")
+    def package_install_cmd(
+        package: Path = typer.Argument(
+            ...,
+            help="Path to the .typy package file to install.",
+        ),
+        store: Path = typer.Option(
+            Path.home() / ".typy" / "packages",
+            "--store",
+            help="Local template store directory. Defaults to ~/.typy/packages.",
+        ),
+        force: bool = typer.Option(
+            False,
+            "--force",
+            help="Overwrite an existing installation of the same name and version.",
+        ),
+    ):
+        """Install a .typy package into the local template store."""
+        cmd_package_install(package, store, force)
 
     return app
 
