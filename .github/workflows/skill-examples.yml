@@ -1,0 +1,68 @@
+name: Skill Examples
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "examples/consume-basic.py"
+      - "examples/consume-custom.py"
+      - "examples/author-python-template.py"
+      - "examples/author-typst-template.typ"
+      - "scripts/verify_pdf.py"
+      - "typy/**"
+  pull_request:
+    paths:
+      - "examples/consume-basic.py"
+      - "examples/consume-custom.py"
+      - "examples/author-python-template.py"
+      - "examples/author-typst-template.typ"
+      - "scripts/verify_pdf.py"
+      - "SKILL.md"
+      - "reference/**"
+      - "typy/**"
+
+jobs:
+  skill-examples:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@cec208311dfd045dd5311c1add060b2062131d57 # v8.0.0
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --frozen --no-default-groups
+
+      - name: Run consume-basic example (Flow A)
+        run: uv run --frozen --no-default-groups python examples/consume-basic.py
+
+      - name: Verify consume-basic PDF
+        run: uv run --frozen --no-default-groups python scripts/verify_pdf.py /tmp/consume-basic.pdf
+
+      - name: Run consume-custom example (Flow A — custom template)
+        run: uv run --frozen --no-default-groups python examples/consume-custom.py
+
+      - name: Verify consume-custom PDF
+        run: uv run --frozen --no-default-groups python scripts/verify_pdf.py /tmp/consume-custom.pdf
+
+      - name: Run author-python-template example (Flow B — minimal)
+        run: uv run --frozen --no-default-groups python examples/author-python-template.py
+
+      - name: Verify author-minimal PDF
+        run: uv run --frozen --no-default-groups python scripts/verify_pdf.py /tmp/author-minimal.pdf
+
+      - name: Verify author-realistic PDF
+        run: uv run --frozen --no-default-groups python scripts/verify_pdf.py /tmp/author-realistic.pdf
+
+      - name: Upload skill example PDFs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: skill-example-pdfs
+          path: /tmp/*.pdf
+          if-no-files-found: ignore
