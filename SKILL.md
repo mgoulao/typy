@@ -14,6 +14,12 @@ description: Use when the user wants to generate a PDF report, slide deck, or
 typy is a Python library that generates PDFs from Typst templates. It exposes
 three distinct surfaces an agent must not confuse:
 
+## Install typy
+
+```bash
+pip install git+https://github.com/mgoulao/typy
+```
+
 | Surface | What it is |
 |---|---|
 | **Typst template** | A `.typ` file using `init_typy` + `typy_data.typ` |
@@ -125,7 +131,7 @@ On error, consult [`reference/troubleshooting.md`](reference/troubleshooting.md)
 
 ### Advanced path
 
-→ [`reference/api-cheatsheet.md`](reference/api-cheatsheet.md) — full API surface  
+→ [`reference/api-cheatsheet.md`](reference/api-cheatsheet.md) — full API surface
 → [`reference/template-authoring.md`](reference/template-authoring.md) — encoding details
 
 ---
@@ -203,8 +209,8 @@ subprocess.run(["python", "scripts/verify_pdf.py", "/tmp/realistic.pdf"], check=
 
 ### Advanced path
 
-→ [`reference/template-authoring.md`](reference/template-authoring.md) — deep dive on the Python↔Typst contract  
-→ [`reference/typst-primer.md`](reference/typst-primer.md) — Typst syntax agents need  
+→ [`reference/template-authoring.md`](reference/template-authoring.md) — deep dive on the Python↔Typst contract
+→ [`reference/typst-primer.md`](reference/typst-primer.md) — Typst syntax agents need
 → [`reference/troubleshooting.md`](reference/troubleshooting.md) — encoding errors and fixes
 
 ---
