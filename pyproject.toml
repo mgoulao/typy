@@ -42,7 +42,7 @@ ignore = ["E501"]
 include = ["typy*"]
 
 [tool.setuptools.package-data]
-typy = ["static/*.typ"]
+typy = ["static/*.typ", "static/templates/*.typ"]
 
 [build-system]
 requires = ["setuptools>=69", "wheel"]

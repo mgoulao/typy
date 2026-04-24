@@ -49,6 +49,63 @@ class Image(Function):
         super().__init__("image", src, **kwargs)
 
 
+class Grid(Function):
+    def __init__(self, content: Content, **kwargs):
+        super().__init__("grid", content, **kwargs)
+
+
+class Columns(Function):
+    def __init__(self, content: Content, **kwargs):
+        super().__init__("columns", content, **kwargs)
+
+
+class Badge(Function):
+    def __init__(
+        self,
+        label: str,
+        fill: Raw = Raw("luma(235)"),
+        stroke: Raw = Raw("none"),
+        radius: Raw = Raw("0.3em"),
+        inset: Raw = Raw("(x: 0.45em, y: 0.12em)"),
+        **kwargs,
+    ):
+        super().__init__(
+            "box",
+            label,
+            fill=fill,
+            stroke=stroke,
+            radius=radius,
+            inset=inset,
+            **kwargs,
+        )
+
+
+class Callout(Function):
+    def __init__(
+        self,
+        content,
+        title: str | None = None,
+        fill: Raw = Raw("luma(245)"),
+        stroke: Raw = Raw("1pt + luma(180)"),
+        radius: Raw = Raw("0.3em"),
+        inset: Raw = Raw("0.8em"),
+        **kwargs,
+    ):
+        if title:
+            callout_content = Content([Raw(f"*{title}*"), content])
+        else:
+            callout_content = Content(content)
+        super().__init__(
+            "block",
+            callout_content,
+            fill=fill,
+            stroke=stroke,
+            radius=radius,
+            inset=inset,
+            **kwargs,
+        )
+
+
 class Table(Function):
     def __init__(self, data: dict, **kwargs):
         if "columns" not in kwargs:
