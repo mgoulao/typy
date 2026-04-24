@@ -6,7 +6,7 @@ End-to-end example: BasicTemplate with a table and an image.
 Run from the repo root:
     python skills/typy/examples/consume-basic.py
 Then verify:
-    python scripts/verify_pdf.py /tmp/consume-basic.pdf
+    typy verify /tmp/consume-basic.pdf
 """
 
 from pathlib import Path

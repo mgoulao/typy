@@ -124,14 +124,22 @@ typy render --template report --markdown body.md --output report.pdf
 ### Verify the output
 
 ```bash
-python scripts/verify_pdf.py output.pdf
+typy verify output.pdf
 ```
 
 For slide decks, always verify expected page count (slides should not silently
 spill into extra pages):
 
 ```bash
-python scripts/verify_pdf.py slides.pdf --min-pages 12
+typy verify slides.pdf --config verify_config.json
+```
+
+where `verify_config.json` contains `{"page_count": {"max_pages": 12}}`.
+
+For machine-readable output in CI pipelines use `--format json`:
+
+```bash
+typy verify output.pdf --format json
 ```
 
 If a slide body can overflow, consider wrapping key regions in Typst with
@@ -259,8 +267,8 @@ builder2.add_template(MyTemplate(title="Real", subtitle="Sub", body="Content."))
 
 # Verify both
 import subprocess
-subprocess.run(["python", "scripts/verify_pdf.py", "/tmp/minimal.pdf"], check=True)
-subprocess.run(["python", "scripts/verify_pdf.py", "/tmp/realistic.pdf"], check=True)
+subprocess.run(["typy", "verify", "/tmp/minimal.pdf"], check=True)
+subprocess.run(["typy", "verify", "/tmp/realistic.pdf"], check=True)
 ```
 
 ### Advanced path

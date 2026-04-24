@@ -9,7 +9,6 @@ on:
       - "skills/typy/examples/consume-custom.py"
       - "skills/typy/examples/author-python-template.py"
       - "skills/typy/examples/author-typst-template.typ"
-      - "scripts/verify_pdf.py"
       - "skills/typy/SKILL.md"
       - "skills/typy/reference/**"
       - "typy/**"
@@ -19,7 +18,6 @@ on:
       - "skills/typy/examples/consume-custom.py"
       - "skills/typy/examples/author-python-template.py"
       - "skills/typy/examples/author-typst-template.typ"
-      - "scripts/verify_pdf.py"
       - "skills/typy/SKILL.md"
       - "skills/typy/reference/**"
       - "typy/**"
@@ -46,22 +44,22 @@ jobs:
         run: uv run --frozen --no-default-groups python skills/typy/examples/consume-basic.py
 
       - name: Verify consume-basic PDF
-        run: uv run --frozen --no-default-groups python scripts/verify_pdf.py /tmp/consume-basic.pdf
+        run: uv run --frozen --no-default-groups typy verify /tmp/consume-basic.pdf
 
       - name: Run consume-custom example (Flow A — custom template)
         run: uv run --frozen --no-default-groups python skills/typy/examples/consume-custom.py
 
       - name: Verify consume-custom PDF
-        run: uv run --frozen --no-default-groups python scripts/verify_pdf.py /tmp/consume-custom.pdf
+        run: uv run --frozen --no-default-groups typy verify /tmp/consume-custom.pdf
 
       - name: Run author-python-template example (Flow B — minimal)
         run: uv run --frozen --no-default-groups python skills/typy/examples/author-python-template.py
 
       - name: Verify author-minimal PDF
-        run: uv run --frozen --no-default-groups python scripts/verify_pdf.py /tmp/author-minimal.pdf
+        run: uv run --frozen --no-default-groups typy verify /tmp/author-minimal.pdf
 
       - name: Verify author-realistic PDF
-        run: uv run --frozen --no-default-groups python scripts/verify_pdf.py /tmp/author-realistic.pdf
+        run: uv run --frozen --no-default-groups typy verify /tmp/author-realistic.pdf
 
       - name: Upload skill example PDFs
         if: always()
@@ -70,3 +68,4 @@ jobs:
           name: skill-example-pdfs
           path: /tmp/*.pdf
           if-no-files-found: ignore
+

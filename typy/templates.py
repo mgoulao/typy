@@ -1,14 +1,25 @@
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, ClassVar, Optional
 
 from pydantic import BaseModel, ConfigDict
 
 from typy.content import Content
 
+if TYPE_CHECKING:
+    from typy.verify import VerificationConfig
+
 
 class Template(BaseModel):
     __template_name__: str
     __template_path__: Path
+
+    #: Optional post-render verification constraints for this template.
+    #: Set to a :class:`~typy.verify.VerificationConfig` instance on a
+    #: subclass to enforce page-count, font-policy, or placeholder checks
+    #: automatically when ``typy render --verify`` is used.
+    verification_config: ClassVar[Optional[VerificationConfig]] = None
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 

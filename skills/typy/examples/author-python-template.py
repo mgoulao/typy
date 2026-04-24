@@ -9,8 +9,8 @@ Shows the complete pattern for creating a new Template class with:
 Run from the repo root:
     python skills/typy/examples/author-python-template.py
 Then verify:
-    python scripts/verify_pdf.py /tmp/author-minimal.pdf
-    python scripts/verify_pdf.py /tmp/author-realistic.pdf
+    typy verify /tmp/author-minimal.pdf
+    typy verify /tmp/author-realistic.pdf
 """
 
 from pathlib import Path
