@@ -799,8 +799,14 @@ def test_main_render_help():
     assert "--data" in plain
     assert "--markdown" in plain
     assert "--output" in plain
+    assert "--verify" in plain
+    assert "--verify-config" in plain
     assert "template module" in plain
-    assert ".typ file" in plain
+    # Strip box-drawing characters and collapse whitespace before checking
+    # multi-word phrases that may wrap across help-panel lines.
+    plain_stripped = re.sub(r"[│╭╰╮╯─]+", " ", plain)
+    plain_collapsed = re.sub(r"\s+", " ", plain_stripped)
+    assert ".typ file" in plain_collapsed
 
 
 def test_main_render_markdown_only(tmp_path):

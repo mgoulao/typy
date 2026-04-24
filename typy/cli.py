@@ -36,6 +36,7 @@ Quick guide:
     2) Inspect required fields: typy info report --json
     3) Create starter data: typy scaffold report --output data.json
     4) Render PDF: typy render --template report --data data.json --output report.pdf
+    5) Verify PDF: typy verify report.pdf
 
 Tip: prefer 'typy info <template> --json' when automating with scripts or AI agents.
 """
@@ -47,6 +48,9 @@ CLI_EPILOG = """Examples:
     typy scaffold report --output data.json
     typy render --template report --data data.json --output report.pdf
     typy render --markdown notes.md --output notes.pdf
+    typy render --template report --data data.json --output report.pdf --verify
+    typy verify report.pdf
+    typy verify report.pdf --config verify_config.json --format json
 """
 
 
@@ -186,6 +190,8 @@ def cmd_render(
     data_file: Path | None,
     markdown_file: Path | None,
     output: Path,
+    verify: bool = False,
+    verify_config_file: Path | None = None,
 ) -> None:
     """Render a document to PDF."""
     from rich.console import Console
@@ -225,6 +231,9 @@ def cmd_render(
             sys.exit(1)
         template = str(Path(_typy_tmpdir.name) / "template.py")
 
+    # Track the instantiated template so we can read its verification_config.
+    _tmpl: Template | None = None
+
     try:
         builder = DocumentBuilder()
 
@@ -247,13 +256,13 @@ def cmd_render(
             from typy.markup import Markdown
             from typy.templates import BasicTemplate
 
-            tmpl = BasicTemplate(
+            _tmpl = BasicTemplate(
                 title=markdown_file.stem,  # type: ignore[union-attr]
                 date=date.today().strftime("%B %d, %Y"),
                 author="",
                 body=Markdown(markdown_content),  # type: ignore[arg-type]
             )
-            builder.add_template(tmpl)
+            builder.add_template(_tmpl)
         else:
             # Load JSON data if provided
             data: dict = {}
@@ -277,11 +286,11 @@ def cmd_render(
                         "you can edit."
                     )
                 try:
-                    tmpl = template_cls(**data)
+                    _tmpl = template_cls(**data)
                 except Exception as e:
                     console.print(f"[red]Error:[/red] Data validation failed: {e}")
                     sys.exit(1)
-                builder.add_template(tmpl)
+                builder.add_template(_tmpl)
             else:
                 # Try as a raw .typ file
                 typ_path = Path(template)
@@ -307,6 +316,35 @@ def cmd_render(
     except Exception as e:
         console.print(f"[red]Error:[/red] Rendering failed: {e}")
         sys.exit(1)
+
+    if verify:
+        from typy.verify import VerificationConfig, verify_pdf
+
+        # Resolve verification config: explicit file > template class attribute > default
+        vc: VerificationConfig | None = None
+        if verify_config_file is not None:
+            if not verify_config_file.exists():
+                console.print(
+                    f"[red]Error:[/red] Verification config file not found: "
+                    f"{verify_config_file}"
+                )
+                sys.exit(1)
+            try:
+                vc = VerificationConfig.model_validate_json(
+                    verify_config_file.read_text(encoding="utf-8")
+                )
+            except Exception as e:
+                console.print(
+                    f"[red]Error:[/red] Could not parse verification config: {e}"
+                )
+                sys.exit(1)
+        elif _tmpl is not None:
+            vc = type(_tmpl).verification_config  # class-level attribute
+
+        result = verify_pdf(output, vc)
+        _print_verify_result(console, result)
+        if not result.passed:
+            sys.exit(2)
 
 
 def _generate_sample_data(template_cls: type[Template]) -> dict:
@@ -379,6 +417,96 @@ def _generate_sample_data(template_cls: type[Template]) -> dict:
         return result
 
     return _for_model(template_cls)
+
+
+# ---------------------------------------------------------------------------
+# Verification helpers
+# ---------------------------------------------------------------------------
+
+
+def _print_verify_result(console: "Console", result: "VerificationResult") -> None:  # noqa: F821
+    """Print a :class:`~typy.verify.VerificationResult` to the console."""
+    if result.passed:
+        warn_note = (
+            f" ({len(result.warnings)} warning(s))" if result.warnings else ""
+        )
+        console.print(
+            f"[green]✓[/green] Verification passed{warn_note}: "
+            f"[cyan]{result.pdf_path}[/cyan]"
+        )
+    else:
+        console.print(
+            f"[red]✗[/red] Verification failed with "
+            f"{len(result.errors)} error(s) "
+            f"(and {len(result.warnings)} warning(s)): "
+            f"[cyan]{result.pdf_path}[/cyan]\n"
+        )
+
+    for diag in result.diagnostics:
+        if diag.severity == "error":
+            console.print(
+                f"  [bold red]{diag.code}[/bold red]  "
+                f"[red][ERROR][/red]  {diag.message}"
+            )
+        else:
+            console.print(
+                f"  [bold yellow]{diag.code}[/bold yellow]  "
+                f"[yellow][WARNING][/yellow]  {diag.message}"
+            )
+        if diag.hint:
+            console.print(f"          [yellow]Hint:[/yellow] {diag.hint}")
+
+
+def cmd_verify(
+    pdf_path: Path,
+    config_file: Path | None = None,
+    as_json: bool = False,
+) -> None:
+    """Verify a rendered PDF against post-render quality checks.
+
+    Exit codes:
+      0 – all checks passed (warnings are informational only).
+      1 – unexpected error (file not found, invalid config).
+      2 – one or more error-level checks failed.
+    """
+    import json as _json
+
+    from rich.console import Console
+
+    from typy.verify import VerificationConfig, verify_pdf
+
+    console = Console(stderr=True)
+
+    if not pdf_path.exists():
+        console.print(f"[red]Error:[/red] PDF not found: {pdf_path}")
+        sys.exit(1)
+
+    vc: VerificationConfig | None = None
+    if config_file is not None:
+        if not config_file.exists():
+            console.print(
+                f"[red]Error:[/red] Config file not found: {config_file}"
+            )
+            sys.exit(1)
+        try:
+            vc = VerificationConfig.model_validate_json(
+                config_file.read_text(encoding="utf-8")
+            )
+        except Exception as e:
+            console.print(
+                f"[red]Error:[/red] Could not parse verification config: {e}"
+            )
+            sys.exit(1)
+
+    result = verify_pdf(pdf_path, vc)
+
+    if as_json:
+        print(_json.dumps(result.to_dict(), indent=2))
+    else:
+        _print_verify_result(console, result)
+
+    if not result.passed:
+        sys.exit(2)
 
 
 def cmd_scaffold(template_name: str, output_file: Path | None) -> None:
@@ -681,6 +809,25 @@ def _build_app():
             "--output",
             help="Output PDF path.",
         ),
+        verify: bool = typer.Option(
+            False,
+            "--verify",
+            help=(
+                "Run post-render verification checks after the PDF is saved. "
+                "Exits with code 2 if any error-level check fails."
+            ),
+        ),
+        verify_config: typing.Optional[Path] = typer.Option(
+            None,
+            "--verify-config",
+            help=(
+                "Path to a JSON file containing a VerificationConfig. "
+                "Overrides any verification_config defined on the template."
+            ),
+            exists=False,
+            file_okay=True,
+            dir_okay=False,
+        ),
     ):
         """Render PDF from template data, Markdown, or both."""
         cmd_render(
@@ -688,7 +835,38 @@ def _build_app():
             data_file=data,
             markdown_file=markdown,
             output=output,
+            verify=verify,
+            verify_config_file=verify_config,
         )
+
+    @app.command("verify")
+    def verify_cmd(
+        pdf: Path = typer.Argument(
+            ...,
+            help="Path to the compiled PDF to verify.",
+        ),
+        config: typing.Optional[Path] = typer.Option(
+            None,
+            "--config",
+            help=(
+                "Path to a JSON file containing a VerificationConfig. "
+                "When omitted, all checks run with no additional constraints."
+            ),
+            exists=False,
+            file_okay=True,
+            dir_okay=False,
+        ),
+        format: str = typer.Option(
+            "text",
+            "--format",
+            help="Output format: 'text' (default) or 'json' for machine-readable output.",
+        ),
+    ):
+        """Verify a rendered PDF against post-render quality checks.
+
+        Exit codes: 0 = passed, 1 = error, 2 = verification failed.
+        """
+        cmd_verify(pdf_path=pdf, config_file=config, as_json=(format == "json"))
 
     # ---- package sub-app ----
     package_app = typer.Typer(
