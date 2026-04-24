@@ -1,12 +1,12 @@
 # RFC: .typy template package format and manifest v1
 
 This document defines the portable template package format used by typy.
-A `.typy` file is a self-contained, distributable unit that bundles a Typst template with its metadata and assets.
+A `.typy` file is a self-contained, distributable unit that bundles a Python `Template` class, the Typst files it references, and any associated assets.
 
 ## Overview
 
 A `.typy` package is a **ZIP archive** with the `.typy` file extension.
-The archive contains a mandatory `manifest.json` (the package descriptor) and one or more Typst template files.
+The archive contains a mandatory `manifest.json` (the package descriptor) and a `template.py` file that defines the template data model as a subclass of `typy.templates.Template`.
 Because it is plain ZIP, consumers can inspect and unpack it with any standard ZIP tool.
 
 ---
@@ -16,10 +16,9 @@ Because it is plain ZIP, consumers can inspect and unpack it with any standard Z
 ```
 my-template.typy          ← ZIP archive with .typy extension
 ├── manifest.json         ← REQUIRED: package descriptor (manifest v1)
-├── template.typ          ← REQUIRED: Typst entry template (name must match manifest "entry")
-├── partials/             ← optional: additional .typ files included by the entry template
-│   ├── header.typ
-│   └── footer.typ
+├── template.py           ← REQUIRED: Python file defining the Template subclass
+├── templates/            ← REQUIRED: Typst files referenced by __template_path__ in template.py
+│   └── template.typ
 ├── assets/               ← optional: images, fonts, or other static resources
 │   ├── logo.png
 │   └── font.ttf
@@ -31,20 +30,20 @@ my-template.typy          ← ZIP archive with .typy extension
 | File | Description |
 |---|---|
 | `manifest.json` | Package descriptor in JSON format conforming to manifest schema v1 (see below). |
-| Entry template | The `.typ` file named by `manifest.json`'s `"entry"` field. This file is the root template compiled by Typst. |
+| `template.py` | Python module containing exactly one `typy.templates.Template` subclass. The class defines the data model and sets `__template_name__` and `__template_path__`. `__template_path__` must be a path relative to the archive root pointing to the entry `.typ` file inside `templates/`. |
+| `templates/` | Directory containing the Typst file(s) referenced by `__template_path__` in `template.py`. At least one `.typ` file must be present. |
 
 ### Optional files
 
 | File/directory | Description |
 |---|---|
-| `partials/` | Additional Typst files referenced with `#import` from the entry template. Paths must be relative and must stay inside the archive root. |
 | `assets/` | Static resources (images, fonts, etc.) referenced by the template. Paths must be relative and must stay inside the archive root. |
 | `README.md` | Package documentation for human readers. Shown by tools that display package info. |
 
 ### Path rules
 
 - All paths inside the archive must be **relative** (no leading `/` or `..` traversal).
-- The entry template and any included files **must not** escape the archive root via path traversal (`../`).
+- `__template_path__` in `template.py` and any files it references **must not** escape the archive root via path traversal (`../`).
 - File names are case-sensitive.
 
 ---
@@ -64,7 +63,6 @@ This document specifies manifest version **1**.
 | `version` | string | **yes** | [Semantic version](https://semver.org/) of this package, e.g. `"1.0.0"`. |
 | `description` | string | **yes** | One-line human-readable summary of the template's purpose. |
 | `author` | string | **yes** | Author name, optionally with email in angle brackets, e.g. `"Jane Doe <jane@example.com>"`. |
-| `entry` | string | **yes** | Relative path (within the archive) to the root Typst template file, e.g. `"template.typ"`. |
 | `typy_compatibility` | string | **yes** | PEP 440 version specifier for the typy version this package requires, e.g. `">=0.1.0"`. |
 | `dependencies` | array of strings | no | List of other `.typy` package identifiers that must be installed before this package. Format for each entry: `"<name>@<version-specifier>"`. Defaults to `[]`. |
 | `license` | string | no | SPDX license identifier, e.g. `"MIT"`. |
@@ -80,7 +78,6 @@ This document specifies manifest version **1**.
   "version": "1.0.0",
   "description": "A general-purpose report template with cover page and TOC.",
   "author": "Jane Doe <jane@example.com>",
-  "entry": "template.typ",
   "typy_compatibility": ">=0.1.0"
 }
 ```
@@ -94,7 +91,6 @@ This document specifies manifest version **1**.
   "version": "2.1.0",
   "description": "Professional invoice template with logo, line items, and tax calculation.",
   "author": "Acme Corp <templates@acme.example.com>",
-  "entry": "invoice.typ",
   "typy_compatibility": ">=0.2.0,<1.0.0",
   "dependencies": [
     "acme-base@>=1.0.0"
@@ -149,8 +145,8 @@ Each diagnostic has a **code**, a human-readable **message**, and an optional **
 ```json
 {
   "code": "PKG_E003",
-  "message": "manifest.json is missing required field: 'entry'",
-  "hint": "Add an 'entry' field whose value is the relative path to the root .typ file inside the archive."
+  "message": "manifest.json is missing required field: 'name'",
+  "hint": "Add a 'name' field using only lowercase letters, digits, and hyphens (e.g. 'my-template')."
 }
 ```
 
@@ -167,7 +163,7 @@ Each diagnostic has a **code**, a human-readable **message**, and an optional **
 | `PKG_E007` | A field has the wrong type | `"manifest.json field '<field>' must be <expected-type>, got <actual-type>."` |
 | `PKG_E008` | `name` does not match the naming pattern | `"'name' must match ^[a-z0-9][a-z0-9-]*[a-z0-9]$, got '<value>'."` |
 | `PKG_E009` | `version` is not a valid semver string | `"'version' must be a valid semantic version (e.g. '1.0.0'), got '<value>'."` |
-| `PKG_E010` | `entry` file is not present in the archive | `"Entry file '<value>' declared in manifest was not found in the archive."` |
+| `PKG_E010` | `template.py` is absent from the archive root | `"template.py not found in package root. The Template subclass must be defined in template.py."` |
 | `PKG_E011` | A path inside the archive escapes the root (`../`) | `"Unsafe path detected in archive: '<path>'. Paths must not traverse outside the package root."` |
 | `PKG_E012` | `typy_compatibility` is not a valid PEP 440 specifier | `"'typy_compatibility' is not a valid version specifier: '<value>'."` |
 | `PKG_E013` | Installed typy version does not satisfy `typy_compatibility` | `"Package requires typy <specifier> but typy <installed-version> is installed."` |
@@ -183,7 +179,6 @@ Validators **must** collect all applicable errors before reporting, so that a us
   "version": "not-a-version",
   "description": "A report template.",
   "author": "Jane Doe",
-  "entry": "missing-file.typ",
   "typy_compatibility": ">=0.1.0"
 }
 ```
@@ -197,8 +192,8 @@ PKG_E008  'name' must match ^[a-z0-9][a-z0-9-]*[a-z0-9]$, got 'My Template'.
 PKG_E009  'version' must be a valid semantic version (e.g. '1.0.0'), got 'not-a-version'.
           Hint: Use MAJOR.MINOR.PATCH format as defined at https://semver.org.
 
-PKG_E010  Entry file 'missing-file.typ' declared in manifest was not found in the archive.
-          Hint: Ensure the file is included in the .typy archive and that the 'entry' path matches exactly.
+PKG_E010  template.py not found in package root. The Template subclass must be defined in template.py.
+          Hint: Add a template.py file to the archive root that defines a subclass of typy.templates.Template.
 ```
 
 ---
