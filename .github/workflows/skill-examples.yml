@@ -23,8 +23,10 @@ on:
       - "typy/**"
 
 jobs:
-  skill-examples:
+  run-skill-examples:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Check out repository

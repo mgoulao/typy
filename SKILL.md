@@ -46,7 +46,7 @@ template = BasicTemplate(
     title="My Report",
     date="2024-01-01",
     author="Jane Doe",
-    body="## Summary\n\nResults look **great**.",  # str auto-converts to Markdown (requires network)
+    body="## Summary\n\nResults look **great**.",  # str auto-converts to Markdown
 )
 builder.add_template(template).save_pdf("output.pdf")
 ```

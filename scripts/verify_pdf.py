@@ -18,7 +18,6 @@ Exit codes:
 """
 
 import argparse
-import struct
 import sys
 from pathlib import Path
 
