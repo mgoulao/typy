@@ -9,7 +9,7 @@ The matching Typst file is examples/author-typst-template.typ.
 Run from the repo root:
     python skills/typy/examples/consume-custom.py
 Then verify:
-    python scripts/verify_pdf.py /tmp/consume-custom.pdf
+    typy verify /tmp/consume-custom.pdf
 """
 
 from pathlib import Path

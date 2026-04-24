@@ -39,7 +39,7 @@ typy render --template technical_report --data /tmp/package-data.json --output "
 
 echo ""
 echo "=== Step 6: Verify the rendered PDF ==="
-python scripts/verify_pdf.py "$RENDER_OUTPUT"
+typy verify "$RENDER_OUTPUT"
 
 echo ""
 echo "Roundtrip complete. PDF: $RENDER_OUTPUT"

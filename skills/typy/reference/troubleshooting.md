@@ -1,7 +1,7 @@
 # Troubleshooting
 
 Error table for the most common typy failures. Match the symptom, apply the
-fix, then re-run `scripts/verify_pdf.py` to confirm.
+fix, then re-run `typy verify <pdf>` to confirm.
 
 ---
 
