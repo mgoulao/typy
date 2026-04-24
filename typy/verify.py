@@ -545,8 +545,7 @@ def check_font_policy(
         for required in config.required_fonts:
             req_lower = required.lower()
             if not any(
-                req_lower in f_lower or f_lower in req_lower
-                for f_lower in fonts_lower
+                req_lower in f_lower or f_lower in req_lower for f_lower in fonts_lower
             ):
                 diagnostics.append(
                     VerificationDiagnostic(

@@ -427,9 +427,7 @@ def _generate_sample_data(template_cls: type[Template]) -> dict:
 def _print_verify_result(console: "Console", result: "VerificationResult") -> None:  # noqa: F821
     """Print a :class:`~typy.verify.VerificationResult` to the console."""
     if result.passed:
-        warn_note = (
-            f" ({len(result.warnings)} warning(s))" if result.warnings else ""
-        )
+        warn_note = f" ({len(result.warnings)} warning(s))" if result.warnings else ""
         console.print(
             f"[green]✓[/green] Verification passed{warn_note}: "
             f"[cyan]{result.pdf_path}[/cyan]"
@@ -484,18 +482,14 @@ def cmd_verify(
     vc: VerificationConfig | None = None
     if config_file is not None:
         if not config_file.exists():
-            console.print(
-                f"[red]Error:[/red] Config file not found: {config_file}"
-            )
+            console.print(f"[red]Error:[/red] Config file not found: {config_file}")
             sys.exit(1)
         try:
             vc = VerificationConfig.model_validate_json(
                 config_file.read_text(encoding="utf-8")
             )
         except Exception as e:
-            console.print(
-                f"[red]Error:[/red] Could not parse verification config: {e}"
-            )
+            console.print(f"[red]Error:[/red] Could not parse verification config: {e}")
             sys.exit(1)
 
     result = verify_pdf(pdf_path, vc)
