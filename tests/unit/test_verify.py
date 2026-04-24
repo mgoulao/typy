@@ -350,15 +350,15 @@ def test_check_page_count_exactly_at_maximum(tmp_path):
     assert diags == []
 
 
-def test_check_page_count_both_min_and_max_violated(tmp_path):
-    """A PDF with 0 pages (fake) triggers both min and max failure."""
+def test_check_page_count_below_min_with_both_constraints(tmp_path):
+    """Page count below min_pages is flagged even when max_pages is also set."""
     pdf = tmp_path / "p.pdf"
-    # Fake a /Count 0 that violates min=1 and max=... wait, 0 < min but not > max.
-    # Let's use a value that violates min with min=5, max=10:
     pdf.write_bytes(_make_pdf(pages=1))
-    diags = check_page_count(pdf, PageCountConfig(min_pages=5, max_pages=2))
-    # min=5, max=2 is contradictory; page=1: violates min (1 < 5) but not max (1 <= 2)
-    assert any(d.code == "VFY_E002" for d in diags)
+    # 1 page violates min=3; does not violate max=10
+    diags = check_page_count(pdf, PageCountConfig(min_pages=3, max_pages=10))
+    assert len(diags) == 1
+    assert diags[0].code == "VFY_E002"
+    assert "1" in diags[0].message  # actual page count mentioned
 
 
 def test_check_page_count_unreadable_count(tmp_path):

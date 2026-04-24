@@ -284,10 +284,16 @@ def _extract_pdf_text(data: bytes) -> str:
                 pass
 
         # Hex strings: <48656C6C6F>
+        # PDF hex strings may use UTF-16-BE (common for Unicode text) or
+        # single-byte encodings.  Try UTF-16-BE first; fall back to latin-1
+        # so that single-byte-encoded placeholder strings are still detected.
         for sm in re.finditer(rb"<([0-9A-Fa-f]+)>", block):
             try:
                 raw = bytes.fromhex(sm.group(1).decode("ascii"))
-                text_parts.append(raw.decode("utf-16-be", errors="replace"))
+                try:
+                    text_parts.append(raw.decode("utf-16-be", errors="strict"))
+                except (UnicodeDecodeError, ValueError):
+                    text_parts.append(raw.decode("latin-1", errors="replace"))
             except Exception:  # noqa: BLE001
                 pass
 
