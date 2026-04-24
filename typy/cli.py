@@ -471,7 +471,7 @@ def cmd_package_export(
         console.print(f"[red]Error:[/red] {e}")
         sys.exit(1)
     except Exception as e:
-        console.print(f"[red]Error:[/red] Export failed: {e}")
+        console.print(f"[red]Error:[/red] Export failed ({type(e).__name__}): {e}")
         sys.exit(1)
 
     Console().print(
@@ -508,7 +508,7 @@ def cmd_package_install(
         console.print(f"[red]Error:[/red] {e}")
         sys.exit(1)
     except Exception as e:
-        console.print(f"[red]Error:[/red] Install failed: {e}")
+        console.print(f"[red]Error:[/red] Install failed ({type(e).__name__}): {e}")
         sys.exit(1)
 
     Console().print(

@@ -302,7 +302,7 @@ def validate_package(
                                     ),
                                 )
                             )
-                    except Exception:
+                    except Exception:  # noqa: BLE001  # importlib may vary; skip gracefully
                         pass  # Can't determine installed version – skip
 
         # PKG_E010 – template.py must be present
@@ -333,11 +333,20 @@ def _load_template_class_from_file(path: Path):
     """Load and return the first ``Template`` subclass found in *path*."""
     from typy.templates import Template
 
+    if not path.exists():
+        raise FileNotFoundError(f"Template file not found: '{path}'.")
+
     spec = importlib.util.spec_from_file_location("_pkg_template", path)
     if spec is None or spec.loader is None:
         raise ValueError(f"Cannot load Python module from '{path}'.")
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)  # type: ignore[union-attr]
+    try:
+        spec.loader.exec_module(module)  # type: ignore[union-attr]
+    except Exception as exc:
+        raise ValueError(
+            f"Failed to execute '{path}': {exc}. "
+            "Ensure template.py is valid Python and all imports are available."
+        ) from exc
     for _, obj in inspect.getmembers(module, inspect.isclass):
         try:
             if issubclass(obj, Template) and obj is not Template:
