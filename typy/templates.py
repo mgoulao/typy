@@ -32,7 +32,7 @@ class LetterTemplate(Template):
     logo: str = ""
 
     __template_name__ = "letter"
-    __template_path__ = Path(__file__).parent.parent / "templates" / "letter.typ"
+    __template_path__ = Path(__file__).parent / "static" / "templates" / "letter.typ"
 
 
 # =================
@@ -58,7 +58,7 @@ class InvoiceTemplate(Template):
     logo: Path | None = None
 
     __template_name__ = "invoice"
-    __template_path__ = Path(__file__).parent.parent / "templates" / "invoice.typ"
+    __template_path__ = Path(__file__).parent / "static" / "templates" / "invoice.typ"
 
 
 # =================
@@ -68,7 +68,10 @@ class Slide(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     title: str
+    subtitle: Optional[str] = None
     body: Content
+    footnote: Optional[str] = None
+    layout_variant: Optional[str] = None
     notes: Optional[str] = None
 
 
@@ -80,7 +83,7 @@ class PresentationTemplate(Template):
     slides: list[Slide]
 
     __template_name__ = "presentation"
-    __template_path__ = Path(__file__).parent.parent / "templates" / "presentation.typ"
+    __template_path__ = Path(__file__).parent / "static" / "templates" / "presentation.typ"
 
 
 # =================
@@ -101,7 +104,7 @@ class AcademicTemplate(Template):
     bibliography_path: Optional[Path] = None
 
     __template_name__ = "academic"
-    __template_path__ = Path(__file__).parent.parent / "templates" / "academic.typ"
+    __template_path__ = Path(__file__).parent / "static" / "templates" / "academic.typ"
 
 
 # =================
@@ -114,7 +117,7 @@ class BasicTemplate(Template):
     body: Content
 
     __template_name__ = "basic"
-    __template_path__ = Path(__file__).parent.parent / "templates" / "basic.typ"
+    __template_path__ = Path(__file__).parent / "static" / "templates" / "basic.typ"
 
 
 # =================
@@ -167,7 +170,7 @@ class CVTemplate(Template):
     certifications: list[CVCertification] = []
 
     __template_name__ = "cv"
-    __template_path__ = Path(__file__).parent.parent / "templates" / "cv.typ"
+    __template_path__ = Path(__file__).parent / "static" / "templates" / "cv.typ"
 
 
 # =================
@@ -183,4 +186,4 @@ class ReportTemplate(Template):
     toc: bool = True
 
     __template_name__ = "report"
-    __template_path__ = Path(__file__).parent.parent / "templates" / "report.typ"
+    __template_path__ = Path(__file__).parent / "static" / "templates" / "report.typ"

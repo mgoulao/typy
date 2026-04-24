@@ -127,6 +127,17 @@ typy render --template report --markdown body.md --output report.pdf
 python scripts/verify_pdf.py output.pdf
 ```
 
+For slide decks, always verify expected page count (slides should not silently
+spill into extra pages):
+
+```bash
+python scripts/verify_pdf.py slides.pdf --min-pages 12
+```
+
+If a slide body can overflow, consider wrapping key regions in Typst with
+explicit clipping, for example `#block(height: 100%, clip: true)[ ... ]`, and
+review the rendered page count before publishing.
+
 On error, consult [`../../reference/troubleshooting.md`](../../reference/troubleshooting.md).
 
 ### Advanced path
@@ -183,10 +194,55 @@ Pair it with a matching `.typ` file — see Quick path below.
 2. `#import "typy_data.typ": typy_data`
 3. `#let typy = init_typy(typy_data)`
 
+This applies to both single-file templates and directory-based templates whose
+entrypoint is `main.typ`.
+
 ### Standard path
 
 See [`../../examples/author-python-template.py`](../../examples/author-python-template.py)
 and [`../../examples/author-typst-template.typ`](../../examples/author-typst-template.typ).
+
+### Presentation template authoring (slide decks)
+
+When authoring deck templates, treat each page as fixed canvas space:
+1. Prefer `Slide.body` values that are layout-driven (`Content([...])` and Typst
+   functions) instead of long prose blocks.
+2. Prefer built-in layout helpers (`Grid`, `Columns`, `Badge`, `Callout`) before
+    dropping to raw Typst.
+3. Add explicit guards for overflow-prone areas (`block(..., clip: true)`) when
+   content must never spill to a new page.
+4. Verify output page count against expected slide count on every render.
+
+Minimal pattern:
+
+```python
+from typy.builder import DocumentBuilder
+from typy.content import Content
+from typy.markup import Raw
+from typy.templates import PresentationTemplate, Slide
+
+slides = [
+    Slide(
+        title="Title Slide",
+        subtitle="Quarterly update",
+        body=Content([
+            Raw("#block(height: 100%, clip: true)["),
+            "## Highlights\n\n- Revenue up\n- Churn down",
+            Raw("]"),
+        ]),
+        footnote="Internal use only",
+        layout_variant="hero",
+    )
+]
+
+DocumentBuilder().add_template(PresentationTemplate(
+    title="Q1 Review",
+    subtitle="Executive summary",
+    author="Data Team",
+    date="2026-04-24",
+    slides=slides,
+)).save_pdf("deck.pdf")
+```
 
 ### Roundtrip test
 
