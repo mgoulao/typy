@@ -14,7 +14,7 @@
   --typy-hero-border: #93c5fd;   /* blue-300 */
 }
 
-[data-theme="light"] {
+body[data-theme="light"] {
   --typy-hero-bg:
     radial-gradient(circle at 10% 18%, rgba(37, 99, 235, 0.14), transparent 36%),
     radial-gradient(circle at 86% 12%, rgba(96, 165, 250, 0.12), transparent 34%),
@@ -22,7 +22,7 @@
   --typy-hero-border: #93c5fd;
 }
 
-[data-theme="dark"] {
+body[data-theme="dark"] {
   --typy-hero-bg:
     radial-gradient(circle at 10% 16%, rgba(37, 99, 235, 0.18), transparent 36%),
     radial-gradient(circle at 88% 14%, rgba(96, 165, 250, 0.10), transparent 34%),
@@ -32,6 +32,31 @@
   --typy-text-muted: color-mix(in srgb, var(--color-foreground-primary) 78%, #94a3b8 22%);
   --typy-shadow-soft: 0 12px 28px rgba(0, 0, 0, 0.34);
   --typy-shadow-lift: 0 18px 34px rgba(0, 0, 0, 0.44);
+}
+
+/* Furo uses data-theme="auto" for system theme; map it explicitly. */
+@media (prefers-color-scheme: dark) {
+  body:not([data-theme="light"]) {
+    --typy-hero-bg:
+      radial-gradient(circle at 10% 16%, rgba(37, 99, 235, 0.18), transparent 36%),
+      radial-gradient(circle at 88% 14%, rgba(96, 165, 250, 0.10), transparent 34%),
+      linear-gradient(120deg, #0f172a 0%, #1e3a5f 100%);
+    --typy-hero-border: #1d4ed8;
+    --typy-card-bg: color-mix(in srgb, var(--color-background-primary) 90%, #0f172a 10%);
+    --typy-text-muted: color-mix(in srgb, var(--color-foreground-primary) 78%, #94a3b8 22%);
+    --typy-shadow-soft: 0 12px 28px rgba(0, 0, 0, 0.34);
+    --typy-shadow-lift: 0 18px 34px rgba(0, 0, 0, 0.44);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  body:not([data-theme="dark"]) {
+    --typy-hero-bg:
+      radial-gradient(circle at 10% 18%, rgba(37, 99, 235, 0.14), transparent 36%),
+      radial-gradient(circle at 86% 12%, rgba(96, 165, 250, 0.12), transparent 34%),
+      linear-gradient(120deg, #eff6ff 0%, #dbeafe 100%);
+    --typy-hero-border: #93c5fd;
+  }
 }
 
 .typy-hero {
