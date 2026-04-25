@@ -34,12 +34,12 @@ ASSETS_DIR = REPO_ROOT / "assets" / "previews"
 
 # (name, example_script_path)
 EXAMPLES: list[tuple[str, Path]] = [
-    ("basic",        REPO_ROOT / "examples" / "basic"        / "basic.py"),
-    ("report",       REPO_ROOT / "examples" / "report"       / "report.py"),
-    ("invoice",      REPO_ROOT / "examples" / "invoice"      / "invoice.py"),
-    ("letter",       REPO_ROOT / "examples" / "letter"       / "letter.py"),
-    ("cv",           REPO_ROOT / "examples" / "cv"           / "cv.py"),
-    ("academic",     REPO_ROOT / "examples" / "academic"     / "academic.py"),
+    ("basic", REPO_ROOT / "examples" / "basic" / "basic.py"),
+    ("report", REPO_ROOT / "examples" / "report" / "report.py"),
+    ("invoice", REPO_ROOT / "examples" / "invoice" / "invoice.py"),
+    ("letter", REPO_ROOT / "examples" / "letter" / "letter.py"),
+    ("cv", REPO_ROOT / "examples" / "cv" / "cv.py"),
+    ("academic", REPO_ROOT / "examples" / "academic" / "academic.py"),
     ("presentation", REPO_ROOT / "examples" / "presentation" / "presentation.py"),
 ]
 
@@ -63,9 +63,7 @@ def _run_example(script: Path, output_pdf: Path) -> None:
             text=True,
         )
         if result.returncode != 0:
-            raise RuntimeError(
-                f"Example script {script.name} failed:\n{result.stderr}"
-            )
+            raise RuntimeError(f"Example script {script.name} failed:\n{result.stderr}")
         # The example scripts write <name>.pdf in cwd
         pdf_candidates = list(tmp_path.glob("*.pdf"))
         if not pdf_candidates:
@@ -73,6 +71,7 @@ def _run_example(script: Path, output_pdf: Path) -> None:
                 f"No PDF produced by {script.name}. stdout:\n{result.stdout}"
             )
         import shutil
+
         shutil.copy(pdf_candidates[0], output_pdf)
 
 
@@ -82,8 +81,7 @@ def _pdf_first_page_to_png(pdf_path: Path, png_path: Path, ppi: int = PPI) -> No
         import typst  # noqa: F401
     except ImportError:
         raise ImportError(
-            "The 'typst' Python package is required. "
-            "Install it with: pip install typst"
+            "The 'typst' Python package is required. Install it with: pip install typst"
         )
 
     # typst.compile supports PNG output when the output filename ends in .png.
@@ -123,9 +121,12 @@ def _convert_with_pdftoppm(pdf_path: Path, png_path: Path, ppi: int) -> None:
         [
             "pdftoppm",
             "-png",
-            "-r", str(ppi),
-            "-f", "1",
-            "-l", "1",
+            "-r",
+            str(ppi),
+            "-f",
+            "1",
+            "-l",
+            "1",
             str(pdf_path),
             str(out_dir / stem),
         ],

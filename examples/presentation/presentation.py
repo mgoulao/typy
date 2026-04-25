@@ -51,7 +51,7 @@ template = PresentationTemplate(
             subtitle="Hero layout — use for section dividers",
             body=Content(
                 [
-                    "This slide uses `layout_variant=\"hero\"` — "
+                    'This slide uses `layout_variant="hero"` — '
                     "full accent background, centered content.",
                 ]
             ),
