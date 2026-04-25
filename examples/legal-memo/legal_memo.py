@@ -55,15 +55,15 @@ analysis = Content(
             "deliver any units by March 1, 2025 constitutes a material breach, as "
             "timely delivery was an express condition of the contract. "
             "Fourth, Plaintiff suffered direct damages including lost revenue and "
-            "emergency procurement costs totaling approximately $2.3 million."
+            "emergency procurement costs totaling approximately 2.3 million USD."
         ),
         Heading(2, "Damages"),
         Text(
             "Plaintiff is entitled to expectation damages placing it in the position "
             "it would have occupied had the contract been performed. "
             "Bi-Economy Mkt., Inc. v. Harleysville Ins. Co. of N.Y., 10 N.Y.3d 187 "
-            "(2008). These include direct damages of $1.8M for the cost differential "
-            "of emergency substitute procurement and consequential damages of $500K "
+            "(2008). These include direct damages of 1.8M USD for the cost differential "
+            "of emergency substitute procurement and consequential damages of 500K USD "
             "for lost production contracts, which were foreseeable at the time of "
             "contracting."
         ),
@@ -75,7 +75,7 @@ conclusion = Content(
         Text(
             "Defendant Delta Industries is liable to Plaintiff Acme Corporation for "
             "breach of contract. We recommend proceeding with a demand letter for "
-            "$2.3 million in damages, followed by litigation if no settlement is "
+            "2.3 million USD in damages, followed by litigation if no settlement is "
             "reached within thirty days. The strength of our documentary evidence "
             "supports a motion for summary judgment at the appropriate stage."
         ),

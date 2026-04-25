@@ -15,6 +15,12 @@ typy ships nine built-in templates grouped into two categories:
 | **basic** | | |
 | [![basic](../assets/previews/basic.png)](#basic) | | |
 
+**Legal vertical**
+
+| legal-brief | legal-memo |
+|---|---|
+| [![legal-brief](../assets/previews/legal-brief.png)](#legal-brief) | [![legal-memo](../assets/previews/legal-memo.png)](#legal-memo) |
+
 | Template | Best for | Key fields |
 |---|---|---|
 | [`report`](#report) | Multi-section reports with TOC | `title`, `author`, `body`, `abstract`, `toc` |
