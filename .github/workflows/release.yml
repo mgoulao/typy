@@ -73,7 +73,7 @@ jobs:
       # Smoke-test that the artifacts actually install and import
       - run: uv run --isolated --no-project --with dist/*.whl    -- python -c "import typy"
       - run: uv run --isolated --no-project --with dist/*.tar.gz -- python -c "import typy"
-      # - run: uv publish
+      - run: uv publish
 
   github-release:
     needs: [bump, publish-pypi]
