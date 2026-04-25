@@ -35,7 +35,6 @@ jobs:
       - name: Regenerate lockfiles
         run: |
           uv lock
-          uvx --from poetry poetry lock
 
       - name: Get new version
         id: version
@@ -43,7 +42,7 @@ jobs:
 
       - name: Commit and tag
         run: |
-          git add pyproject.toml uv.lock poetry.lock
+          git add pyproject.toml uv.lock
           git commit -m "Release v${{ steps.version.outputs.version }}"
           git tag -a "v${{ steps.version.outputs.version }}" -m "Release v${{ steps.version.outputs.version }}"
           git push --follow-tags
