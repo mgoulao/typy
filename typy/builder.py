@@ -32,6 +32,12 @@ class DocumentBuilder:
             shutil.copy(
                 template.__template_path__, Path(self.tmp_dir.name) / "main.typ"
             )
+            # Copy sibling .typ files so that templates can import shared theme
+            # files (e.g. legal-theme.typ) from the same directory.
+            template_dir = template.__template_path__.parent
+            for sibling in template_dir.glob("*.typ"):
+                if sibling != template.__template_path__ and sibling.name != "typy.typ":
+                    shutil.copy(sibling, Path(self.tmp_dir.name) / sibling.name)
         shutil.copy(typy_module, Path(self.tmp_dir.name) / "typy.typ")
 
         template_name = type(template).__name__

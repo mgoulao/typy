@@ -1,0 +1,11 @@
+{
+  "manifest_version": 1,
+  "name": "legal-memo",
+  "version": "1.0.0",
+  "description": "Internal legal memorandum with IRAC structure (Issue / Analysis / Conclusion) and citation-friendly formatting.",
+  "author": "typy contributors",
+  "typy_compatibility": ">=0.8.0",
+  "family": "legal",
+  "license": "MIT",
+  "keywords": ["legal", "memo", "memorandum", "IRAC"]
+}

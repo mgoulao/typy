@@ -51,6 +51,11 @@ typy render --template report --data data.json --output report.pdf
 		<a href="package-format.html">Read RFC</a>
 	</article>
 	<article class="typy-card">
+		<h3>Vertical design systems</h3>
+		<p>Domain-specific template families sharing a Typst theme and Python base models — legal vertical ships built-in.</p>
+		<a href="design-systems.html">Learn more</a>
+	</article>
+	<article class="typy-card">
 		<h3>LLM resources</h3>
 		<p>Machine-oriented entry points and generated llms.txt context files.</p>
 		<a href="llm.html">Open LLM page</a>
@@ -66,6 +71,7 @@ typy render --template report --data data.json --output report.pdf
 cookbook
 getting-started
 templates
+design-systems
 cli
 package-format
 api/index
