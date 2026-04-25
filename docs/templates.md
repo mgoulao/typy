@@ -5,15 +5,23 @@ typy ships seven built-in templates, all sharing a consistent colour palette
 
 ## Templates at a glance
 
+| report | invoice | letter |
+|---|---|---|
+| [![report](../assets/previews/report.png)](#report) | [![invoice](../assets/previews/invoice.png)](#invoice) | [![letter](../assets/previews/letter.png)](#letter) |
+| **cv** | **academic** | **presentation** |
+| [![cv](../assets/previews/cv.png)](#cv) | [![academic](../assets/previews/academic.png)](#academic) | [![presentation](../assets/previews/presentation.png)](#presentation) |
+| **basic** | | |
+| [![basic](../assets/previews/basic.png)](#basic) | | |
+
 | Template | Best for | Key fields |
 |---|---|---|
-| `report` | Multi-section reports with TOC | `title`, `author`, `body`, `abstract`, `toc` |
-| `invoice` | Business invoices with line items | `company_name`, `client_name`, `items`, `tax_rate` |
-| `letter` | Formal letters with letterhead | `sender_name`, `recipient_name`, `subject`, `body` |
-| `cv` | CV / résumé | `name`, `contact`, `experience`, `education`, `skills` |
-| `academic` | Academic papers with bibliography | `title`, `authors`, `abstract`, `body`, `two_column` |
-| `presentation` | 16:9 slide decks | `title`, `author`, `slides` (each with `layout_variant`) |
-| `basic` | Minimal single-section documents | `title`, `author`, `body` |
+| [`report`](#report) | Multi-section reports with TOC | `title`, `author`, `body`, `abstract`, `toc` |
+| [`invoice`](#invoice) | Business invoices with line items | `company_name`, `client_name`, `items`, `tax_rate` |
+| [`letter`](#letter) | Formal letters with letterhead | `sender_name`, `recipient_name`, `subject`, `body` |
+| [`cv`](#cv) | CV / résumé | `name`, `contact`, `experience`, `education`, `skills` |
+| [`academic`](#academic) | Academic papers with bibliography | `title`, `authors`, `abstract`, `body`, `two_column` |
+| [`presentation`](#presentation) | 16:9 slide decks | `title`, `author`, `slides` (each with `layout_variant`) |
+| [`basic`](#basic) | Minimal single-section documents | `title`, `author`, `body` |
 
 Use `typy info <template>` to inspect fields in table form.
 

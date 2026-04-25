@@ -43,21 +43,13 @@ DocumentBuilder().add_template(template).save_pdf("hello-typy.pdf")
 
 ## Template gallery
 
-| Template | Description |
-|---|---|
-| **report** | Multi-section report with optional TOC, abstract, and running headers |
-| **invoice** | Business invoice with line-item table and totals |
-| **letter** | Formal business letter with letterhead |
-| **cv** | CV / résumé with experience, education, and skills |
-| **academic** | Academic paper with abstract, two-column mode, and bibliography |
-| **presentation** | 16:9 slide deck with hero, two-column, and blank layout variants |
-| **basic** | Minimal single-section document |
-
-Generate preview images for all templates by running:
-
-```bash
-python scripts/generate_previews.py
-```
+| report | invoice | letter |
+|---|---|---|
+| [![report](./assets/previews/report.png)](examples/report/report.py) | [![invoice](./assets/previews/invoice.png)](examples/invoice/invoice.py) | [![letter](./assets/previews/letter.png)](examples/letter/letter.py) |
+| **cv** | **academic** | **presentation** |
+| [![cv](./assets/previews/cv.png)](examples/cv/cv.py) | [![academic](./assets/previews/academic.png)](examples/academic/academic.py) | [![presentation](./assets/previews/presentation.png)](examples/presentation/presentation.py) |
+| **basic** | | |
+| [![basic](./assets/previews/basic.png)](examples/basic/basic.py) | | |
 
 ## Documentation
 
