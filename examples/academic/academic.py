@@ -1,3 +1,5 @@
+"""Academic example — demonstrates AcademicTemplate with abstract, two-column body, and bibliography."""
+
 from pathlib import Path
 
 from typy.builder import DocumentBuilder

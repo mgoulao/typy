@@ -1,3 +1,12 @@
+"""Presentation example — demonstrates PresentationTemplate with multiple slide layouts.
+
+Layout variants available:
+  - default (or None): accent header bar + body area
+  - "hero": full accent background with large centered title
+  - "two-column": header + two-column body
+  - "blank": no header, body fills the slide
+"""
+
 from datetime import datetime
 
 from typy.builder import DocumentBuilder
@@ -38,6 +47,34 @@ template = PresentationTemplate(
             ),
         ),
         Slide(
+            title="A Pivotal Moment",
+            subtitle="Hero layout — use for section dividers",
+            body=Content(
+                [
+                    'This slide uses `layout_variant="hero"` — '
+                    "full accent background, centered content.",
+                ]
+            ),
+            layout_variant="hero",
+        ),
+        Slide(
+            title="Two-Column Comparison",
+            body=Content(
+                [
+                    "**Before typy**\n\n"
+                    "- Manual Typst files\n"
+                    "- Copy-paste templates\n"
+                    "- No Python integration\n\n"
+                    "#colbreak()\n\n"
+                    "**After typy**\n\n"
+                    "- Typed Python API\n"
+                    "- Reusable templates\n"
+                    "- PDF in one line",
+                ]
+            ),
+            layout_variant="two-column",
+        ),
+        Slide(
             title="Code Example",
             body=Content(
                 [
@@ -53,6 +90,7 @@ template = PresentationTemplate(
                         "        Slide(\n"
                         '            title="Hello",\n'
                         '            body=Content(["Hello world"]),\n'
+                        '            layout_variant="hero",\n'
                         "        ),\n"
                         "    ],\n"
                         ")\n"
@@ -70,6 +108,7 @@ template = PresentationTemplate(
                     Lorem(40),
                 ]
             ),
+            footnote="Source: Lorem Ipsum generator",
         ),
         Slide(
             title="Thank You",
@@ -79,6 +118,7 @@ template = PresentationTemplate(
                     "Find typy at: *github.com/mgoulao/typy*",
                 ]
             ),
+            layout_variant="hero",
             notes="Leave time for questions.",
         ),
     ],

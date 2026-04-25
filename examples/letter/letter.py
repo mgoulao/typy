@@ -1,3 +1,5 @@
+"""Letter example — demonstrates LetterTemplate for formal business letters."""
+
 from typy.builder import (
     DocumentBuilder,
 )
