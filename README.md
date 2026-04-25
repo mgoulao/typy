@@ -15,7 +15,6 @@ It provides:
 | [![report](./assets/previews/report.png)](examples/report/report.py) | [![invoice](./assets/previews/invoice.png)](examples/invoice/invoice.py) | [![letter](./assets/previews/letter.png)](examples/letter/letter.py) |
 | **cv** | **academic** | **presentation** |
 | [![cv](./assets/previews/cv.png)](examples/cv/cv.py) | [![academic](./assets/previews/academic.png)](examples/academic/academic.py) | [![presentation](./assets/previews/presentation.png)](examples/presentation/presentation.py) |
-| **basic** | | |
 
 ## Install
 
