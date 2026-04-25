@@ -65,6 +65,7 @@ This document specifies manifest version **1**.
 | `author` | string | **yes** | Author name, optionally with email in angle brackets, e.g. `"Jane Doe <jane@example.com>"`. |
 | `typy_compatibility` | string | **yes** | PEP 440 version specifier for the typy version this package requires, e.g. `">=0.1.0"`. |
 | `dependencies` | array of strings | no | List of other `.typy` package identifiers that must be installed before this package. Format for each entry: `"<name>@<version-specifier>"`. Defaults to `[]`. |
+| `family` | string | no | Name of the [vertical design system](design-systems.md) this template belongs to (e.g. `"legal"`). Informational — readers that do not recognise the value must ignore it. |
 | `license` | string | no | SPDX license identifier, e.g. `"MIT"`. |
 | `homepage` | string | no | URL for the package's home page or repository. |
 | `keywords` | array of strings | no | Tags for discovery. Each keyword: max 32 characters. |

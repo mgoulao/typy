@@ -15,6 +15,8 @@ It provides:
 | [![report](./assets/previews/report.png)](examples/report/report.py) | [![invoice](./assets/previews/invoice.png)](examples/invoice/invoice.py) | [![letter](./assets/previews/letter.png)](examples/letter/letter.py) |
 | **cv** | **academic** | **presentation** |
 | [![cv](./assets/previews/cv.png)](examples/cv/cv.py) | [![academic](./assets/previews/academic.png)](examples/academic/academic.py) | [![presentation](./assets/previews/presentation.png)](examples/presentation/presentation.py) |
+| **legal-brief** *(legal vertical)* | **legal-memo** *(legal vertical)* | |
+| [![legal-brief](./assets/previews/legal-brief.png)](examples/legal-brief/legal_brief.py) | [![legal-memo](./assets/previews/legal-memo.png)](examples/legal-memo/legal_memo.py) | |
 
 ## Install
 
@@ -70,6 +72,8 @@ Runnable examples are in [examples/](examples/):
 - [presentation](examples/presentation/presentation.py)
 - [academic](examples/academic/academic.py)
 - [cv](examples/cv/cv.py)
+- [legal-brief](examples/legal-brief/legal_brief.py) *(legal vertical)*
+- [legal-memo](examples/legal-memo/legal_memo.py) *(legal vertical)*
 
 ## Contributing and development
 

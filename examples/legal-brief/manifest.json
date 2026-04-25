@@ -1,0 +1,11 @@
+{
+  "manifest_version": 1,
+  "name": "legal-brief",
+  "version": "1.0.0",
+  "description": "Court filing brief with case caption, line numbering, signature block, and certificate of service.",
+  "author": "typy contributors",
+  "typy_compatibility": ">=0.8.0",
+  "family": "legal",
+  "license": "MIT",
+  "keywords": ["legal", "court", "brief", "filing"]
+}

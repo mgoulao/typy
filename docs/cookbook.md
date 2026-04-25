@@ -302,3 +302,111 @@ MD
 
 typy render --template report --data report-data.json --markdown body.md --output research-summary.pdf
 ```
+
+## 12. Generate a legal brief from Python
+
+Goal: produce a court filing brief with a case caption, paragraph-level line numbering, an attorney signature block, and a certificate of service.
+
+```python
+from typy.builder import DocumentBuilder
+from typy.content import Content
+from typy.markup import Heading
+from typy.templates import (
+    LegalAttorneyInfo,
+    LegalBriefTemplate,
+    LegalLineNumbering,
+    LegalParty,
+)
+
+parties = [
+    LegalParty(name="ACME CORPORATION", role="Plaintiff"),
+    LegalParty(name="DELTA INDUSTRIES INC.", role="Defendant"),
+]
+
+attorney = LegalAttorneyInfo(
+    name="Jane A. Smith",
+    bar_number="CA-123456",
+    firm="Smith & Associates LLP",
+    address="100 Legal Ave, Suite 500\nSan Francisco, CA 94102",
+    phone="(415) 555-0100",
+    email="jsmith@smithlaw.example.com",
+)
+
+body = Content([
+    Heading(1, "Introduction"),
+    "Plaintiff Acme Corporation submits this Motion for Summary Judgment.",
+    Heading(1, "Statement of Facts"),
+    "Defendant failed to deliver contracted goods by the agreed deadline.",
+    Heading(1, "Conclusion"),
+    "Plaintiff requests judgment as a matter of law.",
+])
+
+template = LegalBriefTemplate(
+    court="UNITED STATES DISTRICT COURT\nNORTHERN DISTRICT OF CALIFORNIA",
+    case_number="3:25-cv-01234-JCS",
+    jurisdiction="Federal",
+    parties=parties,
+    attorney_info=attorney,
+    document_title="MOTION FOR SUMMARY JUDGMENT",
+    body=body,
+    line_numbering=LegalLineNumbering(enabled=True, start=1, interval=5),
+    certificate_of_service=(
+        "I certify this document was served on all parties via CM/ECF."
+    ),
+)
+
+DocumentBuilder().add_template(template).save_pdf("brief.pdf")
+```
+
+## 13. Generate a legal memorandum using the IRAC structure
+
+Goal: produce an internal legal memorandum with Issue / Analysis / Conclusion sections.
+
+```python
+from typy.builder import DocumentBuilder
+from typy.content import Content
+from typy.markup import Heading
+from typy.templates import LegalAttorneyInfo, LegalMemoTemplate, LegalParty
+
+parties = [
+    LegalParty(name="ACME CORPORATION", role="Plaintiff"),
+    LegalParty(name="DELTA INDUSTRIES INC.", role="Defendant"),
+]
+
+attorney = LegalAttorneyInfo(
+    name="Robert J. Williams",
+    bar_number="NY-987654",
+    firm="Williams Legal Group",
+    address="250 Park Avenue\nNew York, NY 10177",
+)
+
+template = LegalMemoTemplate(
+    court="SUPREME COURT OF NEW YORK\nCOUNTY OF NEW YORK",
+    case_number="2025-012345",
+    jurisdiction="New York State",
+    parties=parties,
+    attorney_info=attorney,
+    document_title="Liability Analysis and Damages Assessment",
+    date="April 25, 2026",
+    to="Senior Partners",
+    from_="Robert J. Williams",
+    re="Acme Corp. v. Delta Industries — Breach of Contract Assessment",
+    issue=Content([
+        "Whether Defendant is liable for breach of contract based on failure "
+        "to deliver contracted goods by the agreed deadline.",
+    ]),
+    analysis=Content([
+        Heading(2, "Applicable Law"),
+        "Under New York law, a breach of contract claim requires four elements.",
+        Heading(2, "Application"),
+        "The documentary record establishes all four elements of breach.",
+    ]),
+    conclusion=Content([
+        "Defendant is liable. Recommend demand letter followed by litigation "
+        "if no settlement within thirty days.",
+    ]),
+)
+
+DocumentBuilder().add_template(template).save_pdf("memo.pdf")
+```
+

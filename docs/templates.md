@@ -1,7 +1,9 @@
 # Template reference
 
-typy ships seven built-in templates, all sharing a consistent colour palette
-(blue-600 `#2563eb` accent, slate body text) and typographic family.
+typy ships nine built-in templates grouped into two categories:
+
+- **General-purpose** (seven templates): a consistent blue-600 / slate palette shared across standalone templates.
+- **Legal vertical** (two templates): part of the `legal` design system — court filings and memos with case captions, line numbering, and signature blocks. See [Vertical design systems](design-systems.md) for the architecture.
 
 ## Templates at a glance
 
@@ -13,6 +15,12 @@ typy ships seven built-in templates, all sharing a consistent colour palette
 | **basic** | | |
 | [![basic](../assets/previews/basic.png)](#basic) | | |
 
+**Legal vertical**
+
+| legal-brief | legal-memo |
+|---|---|
+| [![legal-brief](../assets/previews/legal-brief.png)](#legal-brief) | [![legal-memo](../assets/previews/legal-memo.png)](#legal-memo) |
+
 | Template | Best for | Key fields |
 |---|---|---|
 | [`report`](#report) | Multi-section reports with TOC | `title`, `author`, `body`, `abstract`, `toc` |
@@ -22,6 +30,8 @@ typy ships seven built-in templates, all sharing a consistent colour palette
 | [`academic`](#academic) | Academic papers with bibliography | `title`, `authors`, `abstract`, `body`, `two_column` |
 | [`presentation`](#presentation) | 16:9 slide decks | `title`, `author`, `slides` (each with `layout_variant`) |
 | [`basic`](#basic) | Minimal single-section documents | `title`, `author`, `body` |
+| [`legal-brief`](#legal-brief) *(legal vertical)* | Court filings with caption & line numbers | `court`, `case_number`, `parties`, `document_title`, `body` |
+| [`legal-memo`](#legal-memo) *(legal vertical)* | Internal legal memos (IRAC) | `court`, `case_number`, `parties`, `to`, `from_`, `issue`, `analysis`, `conclusion` |
 
 Use `typy info <template>` to inspect fields in table form.
 
@@ -283,9 +293,119 @@ DocumentBuilder().add_template(template).save_pdf("hello.pdf")
 
 See the full runnable example at [`examples/basic/basic.py`](../examples/basic/basic.py).
 
+## legal-brief
+
+*(Legal vertical)* A court filing brief with a structured case caption, optional paragraph-level line numbering, an attorney signature block, and an optional certificate of service. Part of the `legal` design system — see [Vertical design systems](design-systems.md).
+
+**Shared fields** (from `LegalBase`): `court`, `case_number`, `jurisdiction`, `parties`, `attorney_info`
+
+**Brief-specific fields**: `document_title`, `body`, `line_numbering`, `certificate_of_service`
+
+```python
+from typy.builder import DocumentBuilder
+from typy.content import Content
+from typy.markup import Heading
+from typy.templates import (
+    LegalAttorneyInfo,
+    LegalBriefTemplate,
+    LegalLineNumbering,
+    LegalParty,
+)
+
+template = LegalBriefTemplate(
+    court="UNITED STATES DISTRICT COURT\nNORTHERN DISTRICT OF CALIFORNIA",
+    case_number="3:25-cv-01234-JCS",
+    jurisdiction="Federal",
+    parties=[
+        LegalParty(name="ACME CORPORATION", role="Plaintiff"),
+        LegalParty(name="DELTA INDUSTRIES INC.", role="Defendant"),
+    ],
+    attorney_info=LegalAttorneyInfo(
+        name="Jane A. Smith",
+        bar_number="CA-123456",
+        firm="Smith & Associates LLP",
+        address="100 Legal Ave, Suite 500\nSan Francisco, CA 94102",
+        phone="(415) 555-0100",
+        email="jsmith@smithlaw.example.com",
+    ),
+    document_title="MOTION FOR SUMMARY JUDGMENT",
+    body=Content([
+        Heading(1, "Introduction"),
+        "Plaintiff respectfully submits this Motion for Summary Judgment.",
+        Heading(1, "Conclusion"),
+        "Plaintiff requests judgment as a matter of law.",
+    ]),
+    line_numbering=LegalLineNumbering(enabled=True, start=1, interval=5),
+    certificate_of_service=(
+        "I certify this document was served on all parties via CM/ECF."
+    ),
+)
+
+DocumentBuilder().add_template(template).save_pdf("brief.pdf")
+```
+
+### LegalLineNumbering fields
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `enabled` | `bool` | `True` | Toggle line numbering on/off |
+| `start` | `int` | `1` | Starting paragraph number |
+| `interval` | `int` | `1` | Display a number every N paragraphs |
+
+See the full runnable example at [`examples/legal-brief/legal_brief.py`](../examples/legal-brief/legal_brief.py).
+
+## legal-memo
+
+*(Legal vertical)* An internal legal memorandum using the IRAC structure (Issue / Analysis / Conclusion) with citation-friendly formatting and an attorney signature block. Part of the `legal` design system — see [Vertical design systems](design-systems.md).
+
+**Shared fields** (from `LegalBase`): `court`, `case_number`, `jurisdiction`, `parties`, `attorney_info`
+
+**Memo-specific fields**: `document_title`, `date`, `to`, `from_`, `re`, `issue`, `analysis`, `conclusion`
+
+```python
+from typy.builder import DocumentBuilder
+from typy.content import Content
+from typy.templates import (
+    LegalAttorneyInfo,
+    LegalMemoTemplate,
+    LegalParty,
+)
+
+template = LegalMemoTemplate(
+    court="SUPREME COURT OF NEW YORK\nCOUNTY OF NEW YORK",
+    case_number="2025-012345",
+    jurisdiction="New York State",
+    parties=[
+        LegalParty(name="ACME CORPORATION", role="Plaintiff"),
+        LegalParty(name="DELTA INDUSTRIES INC.", role="Defendant"),
+    ],
+    attorney_info=LegalAttorneyInfo(
+        name="Robert J. Williams",
+        bar_number="NY-987654",
+        firm="Williams Legal Group",
+        address="250 Park Avenue\nNew York, NY 10177",
+    ),
+    document_title="Liability Analysis and Damages Assessment",
+    date="April 25, 2026",
+    to="Senior Partners",
+    from_="Robert J. Williams",
+    re="Acme Corp. v. Delta Industries — Breach of Contract",
+    issue=Content(["Whether defendant is liable for breach of contract."]),
+    analysis=Content([
+        "Under New York law, a breach of contract claim requires four elements.",
+    ]),
+    conclusion=Content(["Defendant is liable; recommend filing suit."]),
+)
+
+DocumentBuilder().add_template(template).save_pdf("memo.pdf")
+```
+
+See the full runnable example at [`examples/legal-memo/legal_memo.py`](../examples/legal-memo/legal_memo.py).
+
 ## Inspect any template
 
 ```bash
 typy info report
 typy info invoice --json
+typy info legal-brief --json
 ```

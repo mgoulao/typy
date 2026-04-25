@@ -41,6 +41,8 @@ EXAMPLES: list[tuple[str, Path]] = [
     ("cv", REPO_ROOT / "examples" / "cv" / "cv.py"),
     ("academic", REPO_ROOT / "examples" / "academic" / "academic.py"),
     ("presentation", REPO_ROOT / "examples" / "presentation" / "presentation.py"),
+    ("legal-brief", REPO_ROOT / "examples" / "legal-brief" / "legal_brief.py"),
+    ("legal-memo", REPO_ROOT / "examples" / "legal-memo" / "legal_memo.py"),
 ]
 
 # PNG export resolution (pixels per inch equivalent – typst uses px/pt)
