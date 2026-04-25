@@ -15,7 +15,7 @@ or generate preview images with `python scripts/generate_previews.py`.
 ## 1. Install typy
 
 ```bash
-pip install git+https://github.com/mgoulao/typy
+pip install typy
 ```
 
 ## 2. Render your first PDF with the CLI

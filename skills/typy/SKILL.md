@@ -17,7 +17,7 @@ three distinct surfaces an agent must not confuse:
 ## Install typy
 
 ```bash
-pip install git+https://github.com/mgoulao/typy
+pip install typy
 ```
 
 | Surface | What it is |

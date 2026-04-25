@@ -5,6 +5,13 @@ description = ""
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [{ name = "Manuel Goulão", email = "msilvagoulao@gmail.com" }]
+
+[project.urls]
+Homepage = "https://mgoulao.github.io/typy/"
+Repository = "https://github.com/mgoulao/typy"
+"Bug Tracker" = "https://github.com/mgoulao/typy/issues"
+PyPI = "https://pypi.org/project/typy/"
+
 dependencies = [
 	"typst>=0.14",
 	"pydantic>=2.11.3,<3.0.0",

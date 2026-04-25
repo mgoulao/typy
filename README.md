@@ -20,7 +20,7 @@ It provides:
 ## Install
 
 ```bash
-pip install git+https://github.com/mgoulao/typy
+pip install typy
 ```
 
 ## Quick start (CLI)
