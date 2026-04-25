@@ -10,7 +10,12 @@ It provides:
 > [!WARNING]
 > typy is still experimental and APIs may change between releases.
 
-![Basic PDF](./assets/example.png)
+| report | invoice | letter |
+|---|---|---|
+| [![report](./assets/previews/report.png)](examples/report/report.py) | [![invoice](./assets/previews/invoice.png)](examples/invoice/invoice.py) | [![letter](./assets/previews/letter.png)](examples/letter/letter.py) |
+| **cv** | **academic** | **presentation** |
+| [![cv](./assets/previews/cv.png)](examples/cv/cv.py) | [![academic](./assets/previews/academic.png)](examples/academic/academic.py) | [![presentation](./assets/previews/presentation.png)](examples/presentation/presentation.py) |
+| **basic** | | |
 
 ## Install
 
@@ -40,16 +45,6 @@ template = BasicTemplate(
 
 DocumentBuilder().add_template(template).save_pdf("hello-typy.pdf")
 ```
-
-## Template gallery
-
-| report | invoice | letter |
-|---|---|---|
-| [![report](./assets/previews/report.png)](examples/report/report.py) | [![invoice](./assets/previews/invoice.png)](examples/invoice/invoice.py) | [![letter](./assets/previews/letter.png)](examples/letter/letter.py) |
-| **cv** | **academic** | **presentation** |
-| [![cv](./assets/previews/cv.png)](examples/cv/cv.py) | [![academic](./assets/previews/academic.png)](examples/academic/academic.py) | [![presentation](./assets/previews/presentation.png)](examples/presentation/presentation.py) |
-| **basic** | | |
-| [![basic](./assets/previews/basic.png)](examples/basic/basic.py) | | |
 
 ## Documentation
 
