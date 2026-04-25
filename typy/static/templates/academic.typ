@@ -3,6 +3,9 @@
 
 #let typy = init_typy(typy_data)
 
+// ── Shared palette ──────────────────────────────────────────────────────────
+#let accent = rgb("#2563eb")  // blue-600 (shared typy palette)
+
 // Page settings
 #set page(
   paper: "a4",
@@ -17,6 +20,13 @@
 // Numbered sections and figures
 #set heading(numbering: "1.1")
 #set figure(numbering: "1")
+
+#show heading.where(level: 1): it => {
+  v(1em, weak: true)
+  set text(fill: accent)
+  it
+  v(0.4em, weak: true)
+}
 
 // Title block
 #align(center)[
@@ -37,8 +47,14 @@
 #v(1.2em)
 
 // Abstract and keywords
-#block(width: 100%, inset: (x: 1.5cm))[
-  #align(center)[#text(weight: "bold")[Abstract]]
+#block(
+  width: 100%,
+  inset: (x: 1.5cm, y: 0.8em),
+  fill: rgb("#eff6ff"),
+  stroke: (left: 3pt + accent),
+  radius: (right: 3pt),
+)[
+  #align(center)[#text(weight: "bold", fill: accent)[Abstract]]
   #v(0.4em)
   #text(10pt)[#typy("abstract", "str")]
   #let kws = typy("keywords", "array")
@@ -49,7 +65,7 @@
 ]
 
 #v(1em)
-#line(length: 100%)
+#line(length: 100%, stroke: 0.4pt + rgb("#e2e8f0"))
 #v(0.8em)
 
 // Body (single or two-column)

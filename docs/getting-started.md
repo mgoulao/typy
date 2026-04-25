@@ -2,6 +2,16 @@
 
 This page gets you from zero to your first PDF with both CLI and Python API.
 
+## What typy produces
+
+typy generates polished PDFs powered by Typst.  All built-in templates share
+a consistent visual identity: blue-600 (`#2563eb`) accent colour, clean
+typographic hierarchy, and A4 page layouts.  The presentation template uses
+16:9 slides.
+
+Run the example scripts under `examples/` to see each template in action,
+or generate preview images with `python scripts/generate_previews.py`.
+
 ## 1. Install typy
 
 ```bash

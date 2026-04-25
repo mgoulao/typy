@@ -1,3 +1,5 @@
+"""Basic example — demonstrates BasicTemplate with text, figure, and table."""
+
 from pathlib import Path
 
 import pandas as pd

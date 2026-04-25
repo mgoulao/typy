@@ -92,6 +92,7 @@ class PresentationTemplate(Template):
     author: str
     date: str
     slides: list[Slide]
+    theme: Optional[str] = None
 
     __template_name__ = "presentation"
     __template_path__ = (

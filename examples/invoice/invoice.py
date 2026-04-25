@@ -1,3 +1,5 @@
+"""Invoice example — demonstrates InvoiceTemplate with line items and tax."""
+
 from typy.builder import DocumentBuilder
 from typy.templates import InvoiceItem, InvoiceTemplate
 

@@ -36,16 +36,20 @@
 
 // ── Page Setup ────────────────────────────────────────────────────────────
 #set page(paper: "a4", margin: (x: 2cm, y: 2cm))
-#set text(size: 10pt)
+#set text(font: "Linux Libertine", size: 10pt, fill: rgb("#334155"))
+
+// ── Shared palette ─────────────────────────────────────────────────────────
+#let accent   = rgb("#2563eb")  // blue-600 (matches typy family)
+#let muted    = rgb("#94a3b8")  // slate-400
 
 // ── Header ────────────────────────────────────────────────────────────────
 #grid(
   columns: (1fr, auto),
   gutter: 1em,
   align(left + horizon)[
-    #text(size: 22pt, weight: "bold")[#company_name]
+    #text(size: 22pt, weight: "bold", fill: rgb("#0f172a"))[#company_name]
     #linebreak()
-    #text(size: 9pt, fill: luma(80))[#company_address]
+    #text(size: 9pt, fill: muted)[#company_address]
   ],
   align(right + horizon)[
     #if logo != none {
@@ -54,7 +58,7 @@
   ],
 )
 #v(0.5cm)
-#line(length: 100%, stroke: 0.5pt + luma(180))
+#line(length: 100%, stroke: 0.5pt + rgb("#e2e8f0"))
 #v(0.4cm)
 
 // ── Invoice Meta ──────────────────────────────────────────────────────────
@@ -65,10 +69,10 @@
     *Bill To* \
     #v(0.15cm)
     #client_name \
-    #text(size: 9pt, fill: luma(80))[#client_address]
+    #text(size: 9pt, fill: muted)[#client_address]
   ],
   align(right)[
-    #text(size: 18pt, weight: "bold", fill: luma(100))[INVOICE] \
+    #text(size: 18pt, weight: "bold", fill: accent)[INVOICE] \
     #v(0.2cm)
     \##invoice_number \
     Date: #invoice_date \
@@ -79,8 +83,8 @@
 
 // ── Items Table ───────────────────────────────────────────────────────────
 #{
-  let header-fill = rgb("#1a5276")
-  let alt-fill    = rgb("#eaf4fb")
+  let header-fill = accent
+  let alt-fill    = rgb("#eff6ff")  // blue-50
   let rows = (
     table.cell(fill: header-fill)[#text(fill: white, weight: "bold")[Description]],
     table.cell(fill: header-fill, align: right)[#text(fill: white, weight: "bold")[Qty]],
@@ -116,17 +120,17 @@
     inset: (x: 4pt, y: 3pt),
     [Subtotal], [#fmt-money(subtotal)],
     ..tax-row,
-    table.hline(stroke: 0.5pt),
-    [*Total*], [*#fmt-money(total)*],
+    table.hline(stroke: 0.5pt + rgb("#e2e8f0")),
+    [*Total*], [#text(fill: accent, weight: "bold")[#fmt-money(total)]],
   )
 ]
 
 // ── Notes ─────────────────────────────────────────────────────────────────
 #if notes != none [
   #v(0.8cm)
-  #line(length: 100%, stroke: 0.5pt + luma(180))
+  #line(length: 100%, stroke: 0.5pt + rgb("#e2e8f0"))
   #v(0.3cm)
-  *Notes* \
+  #text(weight: "bold", fill: rgb("#0f172a"))[Notes] \
   #v(0.1cm)
-  #notes
+  #text(fill: muted)[#notes]
 ]

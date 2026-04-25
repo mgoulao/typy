@@ -1,3 +1,5 @@
+"""CV example — demonstrates CVTemplate with experience, education, and skills."""
+
 from typy.builder import DocumentBuilder
 from typy.templates import (
     CVCertification,

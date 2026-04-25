@@ -41,6 +41,24 @@ template = BasicTemplate(
 DocumentBuilder().add_template(template).save_pdf("hello-typy.pdf")
 ```
 
+## Template gallery
+
+| Template | Description |
+|---|---|
+| **report** | Multi-section report with optional TOC, abstract, and running headers |
+| **invoice** | Business invoice with line-item table and totals |
+| **letter** | Formal business letter with letterhead |
+| **cv** | CV / résumé with experience, education, and skills |
+| **academic** | Academic paper with abstract, two-column mode, and bibliography |
+| **presentation** | 16:9 slide deck with hero, two-column, and blank layout variants |
+| **basic** | Minimal single-section document |
+
+Generate preview images for all templates by running:
+
+```bash
+python scripts/generate_previews.py
+```
+
 ## Documentation
 
 Published documentation website: [mgoulao.github.io/typy](https://mgoulao.github.io/typy/)
@@ -62,8 +80,10 @@ Runnable examples are in [examples/](examples/):
 - [basic](examples/basic/basic.py)
 - [report](examples/report/report.py)
 - [invoice](examples/invoice/invoice.py)
+- [letter](examples/letter/letter.py)
 - [presentation](examples/presentation/presentation.py)
 - [academic](examples/academic/academic.py)
+- [cv](examples/cv/cv.py)
 
 ## Contributing and development
 

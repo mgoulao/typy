@@ -1,3 +1,5 @@
+"""Report example — demonstrates ReportTemplate with abstract, TOC, and sections."""
+
 from datetime import datetime
 
 from typy.builder import DocumentBuilder

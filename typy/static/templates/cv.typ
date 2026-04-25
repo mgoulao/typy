@@ -9,7 +9,7 @@
 #set par(leading: 0.65em)
 
 // ── Color palette ────────────────────────────────────────────────────────────
-#let accent = rgb("#2563eb")  // blue-600
+#let accent = rgb("#2563eb")  // blue-600 (shared typy palette)
 
 // ── Helper: thin horizontal rule ─────────────────────────────────────────────
 #let hrule = line(length: 100%, stroke: 0.5pt + luma(180))

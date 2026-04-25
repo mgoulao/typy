@@ -23,12 +23,12 @@
         align(left,  emph(title_val)),
         align(right, author_val),
       )
-      line(length: 100%, stroke: 0.4pt + luma(160))
+      line(length: 100%, stroke: 0.4pt + rgb("#e2e8f0"))
     }
   },
   footer: context {
     set text(size: 9pt, fill: luma(120))
-    line(length: 100%, stroke: 0.4pt + luma(160))
+    line(length: 100%, stroke: 0.4pt + rgb("#e2e8f0"))
     align(center, counter(page).display("1 / 1", both: true))
   },
 )
@@ -40,9 +40,12 @@
 #set par(justify: true, leading: 0.65em, spacing: 1.2em)
 #set heading(numbering: "1.1")
 
+// ── Shared palette ──────────────────────────────────────────────────────────
+#let accent = rgb("#2563eb")  // blue-600
+
 #show heading.where(level: 1): it => {
   v(1.2em, weak: true)
-  set text(size: 14pt, weight: "bold")
+  set text(size: 14pt, weight: "bold", fill: accent)
   it
   v(0.4em, weak: true)
 }
@@ -100,9 +103,10 @@
     width: 88%,
     inset: (x: 1.2em, y: 0.9em),
     radius: 3pt,
-    stroke: 0.5pt + luma(200),
+    stroke: 0.5pt + rgb("#bfdbfe"),
+    fill: rgb("#eff6ff"),
     [
-      #align(center, text(weight: "bold", size: 10pt)[Abstract])
+      #align(center, text(weight: "bold", size: 10pt, fill: accent)[Abstract])
       #v(0.4em)
       #set text(size: 10pt)
       #abstract_val
