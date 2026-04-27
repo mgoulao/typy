@@ -20,6 +20,8 @@ It provides:
 
 ```bash
 pip install typy
+# or
+uv add typy
 ```
 
 ## Quick start (CLI)
