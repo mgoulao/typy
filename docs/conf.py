@@ -23,6 +23,7 @@ autodoc_member_order = "bysource"
 autodoc_typehints = "description"
 
 myst_enable_extensions = [
+    "attrs_inline",
     "colon_fence",
     "deflist",
     "fieldlist",
