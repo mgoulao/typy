@@ -7,11 +7,9 @@ typy ships seven built-in templates, all sharing a consistent colour palette
 
 | report | invoice | letter |
 |---|---|---|
-| [![report](../assets/previews/report.png)](#report) | [![invoice](../assets/previews/invoice.png)](#invoice) | [![letter](../assets/previews/letter.png)](#letter) |
+| [<img src="../assets/previews/report.png" alt="report" width="260">](#report) | [<img src="../assets/previews/invoice.png" alt="invoice" width="260">](#invoice) | [<img src="../assets/previews/letter.png" alt="letter" width="260">](#letter) |
 | **cv** | **academic** | **presentation** |
-| [![cv](../assets/previews/cv.png)](#cv) | [![academic](../assets/previews/academic.png)](#academic) | [![presentation](../assets/previews/presentation.png)](#presentation) |
-| **basic** | | |
-| [![basic](../assets/previews/basic.png)](#basic) | | |
+| [<img src="../assets/previews/cv.png" alt="cv" width="260">](#cv) | [<img src="../assets/previews/academic.png" alt="academic" width="260">](#academic) | [<img src="../assets/previews/presentation.png" alt="presentation" width="260">](#presentation) |
 
 | Template | Best for | Key fields |
 |---|---|---|

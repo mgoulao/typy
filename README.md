@@ -12,9 +12,9 @@ It provides:
 
 | report | invoice | letter |
 |---|---|---|
-| [![report](./assets/previews/report.png)](examples/report/report.py) | [![invoice](./assets/previews/invoice.png)](examples/invoice/invoice.py) | [![letter](./assets/previews/letter.png)](examples/letter/letter.py) |
+| [<img src="./assets/previews/report.png" alt="report" width="260">](examples/report/report.py) | [<img src="./assets/previews/invoice.png" alt="invoice" width="260">](examples/invoice/invoice.py) | [<img src="./assets/previews/letter.png" alt="letter" width="260">](examples/letter/letter.py) |
 | **cv** | **academic** | **presentation** |
-| [![cv](./assets/previews/cv.png)](examples/cv/cv.py) | [![academic](./assets/previews/academic.png)](examples/academic/academic.py) | [![presentation](./assets/previews/presentation.png)](examples/presentation/presentation.py) |
+| [<img src="./assets/previews/cv.png" alt="cv" width="260">](examples/cv/cv.py) | [<img src="./assets/previews/academic.png" alt="academic" width="260">](examples/academic/academic.py) | [<img src="./assets/previews/presentation.png" alt="presentation" width="260">](examples/presentation/presentation.py) |
 
 ## Install
 
