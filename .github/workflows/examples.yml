@@ -24,9 +24,9 @@ jobs:
         working-directory: examples/basic
         run: uv run --frozen --extra pandas --no-default-groups python basic.py
 
-      - name: Run custom example
-        working-directory: examples/custom
-        run: uv run --frozen --no-default-groups python custom.py
+      - name: Run report example
+        working-directory: examples/report
+        run: uv run --frozen --no-default-groups python report.py
 
       - name: Run invoice example
         working-directory: examples/invoice
@@ -36,9 +36,25 @@ jobs:
         working-directory: examples/letter
         run: uv run --frozen --no-default-groups python letter.py
 
+      - name: Run cv example
+        working-directory: examples/cv
+        run: uv run --frozen --no-default-groups python cv.py
+
+      - name: Run academic example
+        working-directory: examples/academic
+        run: uv run --frozen --no-default-groups python academic.py
+
       - name: Run presentation example
         working-directory: examples/presentation
         run: uv run --frozen --no-default-groups python presentation.py
+
+      - name: Run markdown example
+        working-directory: examples/markdown
+        run: uv run --frozen --no-default-groups python markdown.py
+
+      - name: Run custom example
+        working-directory: examples/custom
+        run: uv run --frozen --no-default-groups python custom.py
 
       - name: Run translations example
         working-directory: examples/translations

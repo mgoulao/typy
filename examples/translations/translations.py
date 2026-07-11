@@ -34,4 +34,4 @@ template = PresentationTemplate(
 )
 
 
-builder.add_template(template).save_pdf("presentation.pdf")
+builder.add_template(template).save_pdf("translations.pdf")

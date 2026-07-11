@@ -43,26 +43,20 @@
 // ── Shared palette ──────────────────────────────────────────────────────────
 #let accent = rgb("#2563eb")  // blue-600
 
-#show heading.where(level: 1): it => {
-  v(1.2em, weak: true)
+#show heading.where(level: 1): it => block(above: 1.6em, below: 0.9em, {
   set text(size: 14pt, weight: "bold", fill: accent)
   it
-  v(0.4em, weak: true)
-}
+})
 
-#show heading.where(level: 2): it => {
-  v(0.9em, weak: true)
+#show heading.where(level: 2): it => block(above: 1.3em, below: 0.7em, {
   set text(size: 12pt, weight: "bold")
   it
-  v(0.3em, weak: true)
-}
+})
 
-#show heading.where(level: 3): it => {
-  v(0.7em, weak: true)
+#show heading.where(level: 3): it => block(above: 1.1em, below: 0.6em, {
   set text(size: 11pt, weight: "bold")
   it
-  v(0.2em, weak: true)
-}
+})
 
 // Code blocks
 #show raw.where(block: true): it => {
