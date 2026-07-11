@@ -6,7 +6,7 @@
 // ── Page setup ──────────────────────────────────────────────────────────────
 #set page(margin: (x: 2cm, y: 1.8cm))
 #set text(font: "Linux Libertine", size: 10.5pt, lang: "en")
-#set par(leading: 0.65em)
+#set par(leading: 0.65em, spacing: 0.5em)
 
 // ── Color palette ────────────────────────────────────────────────────────────
 #let accent = rgb("#2563eb")  // blue-600 (shared typy palette)
@@ -27,7 +27,7 @@
 #let entry(left-top, right-top, left-bottom, right-bottom, description) = {
   grid(
     columns: (1fr, auto),
-    row-gutter: 0.15em,
+    row-gutter: 0.4em,
     text(weight: "semibold", left-top),
     align(right, text(fill: luma(80), right-top)),
     text(style: "italic", left-bottom),
